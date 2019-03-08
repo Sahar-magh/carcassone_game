@@ -1,0 +1,51 @@
+CLIENT_DIR=src/client
+SERVER_DIR=src/serveur
+INSTALL_DIR=install
+TEST_DIR=src/test
+
+BIN=client1 client2 client3 server
+
+
+CC=gcc
+CFLAGS=-Wall -Wextra -std=c99
+CSHARE=-fPIC -shared
+
+build: ${BIN}
+
+test: test_client.o
+	${CC} -o $@ test_client.o
+
+test_client.o: ${TEST_DIR}/test_client.c
+	${CC} ${CFLAGS} -I${TEST_DIR} ${TEST_DIR}/test_client.c -c 
+
+install: server client1 client2 client3 
+	cp server ${INSTALL_DIR}/ && cp *.so ${INSTALL_DIR}/
+
+clean:
+	@rm -rf ${INSTALL_DIR}/server ${INSTALL_DIR}/*.so *.so *.o server *.out server test
+
+client1: ${CLIENT_DIR}/client_1.c ${CLIENT_DIR}/carcassonne_interface.h
+	${CC} ${CFLAGS} ${CSHARE} -o $@.so ${CLIENT_DIR}/client_1.c 
+client2: ${CLIENT_DIR}/client_2.c ${CLIENT_DIR}/carcassonne_interface.h
+	${CC} ${CFLAGS} ${CSHARE} -o $@.so ${CLIENT_DIR}/client_2.c 
+client3: ${CLIENT_DIR}/client_3.c ${CLIENT_DIR}/carcassonne_interface.h
+	${CC} ${CFLAGS} ${CSHARE} -o $@.so ${CLIENT_DIR}/client_3.c 
+
+serveur.o: ${SERVER_DIR}/serveur.c  ${SERVER_DIR}/carcassonne_interface.h
+	${CC} ${CFLAGS} -I${SERVER_DIR} ${SERVER_DIR}/serveur.c -c
+
+server: serveur.o
+	${CC} -o $@ serveur.o -ldl
+
+aff:
+	@echo
+	@echo -e "\033[031mdossier racine : \033[0m" && ls -1
+	@echo
+	@echo -e "\033[032mdossier client : \033[0m" && ls -1 ${CLIENT_DIR}
+	@echo 
+	@echo -e "\033[032mdossier serveur : \033[0m" && ls -1 ${SERVER_DIR}
+	@echo
+	@echo -e "\033[032mdossier install :\033[0m" && ls -1 ${INSTALL_DIR}
+	@echo
+
+

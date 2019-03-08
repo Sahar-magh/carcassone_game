@@ -1,0 +1,893 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <assert.h>
+
+#include "carte.h"
+#include "link.h"
+#include "updateTown.h"
+
+////////////Function used to debug////////////
+
+void aff_tuile(struct tuille t){
+  printf("----------tuile-------------\n");
+  printf("type : { ");
+  for(int i =0;i<4;i++){
+    printf("{ ");
+    for(int j=0;j<3;j++){
+      printf("%d, ",t.type[i][j]);
+    }
+    printf("} ");
+  }
+  printf("}\n");
+  printf("pion : { ");
+  for(int i =0;i<4;i++){
+    printf("{ ");
+    for(int j=0;j<3;j++){
+      printf("%d, ",t.pion[i][j]);
+    }
+    printf("} ");
+  }
+  printf("}\n");
+  printf("id : %d\n",t.id);
+  printf("dir : %d\n",t.dir);
+  printf("milieu : %d\n",t.milieu);
+  printf("shield : %d\n",t.shield);
+  printf("position : (%d,%d)\n",t.position[0],t.position[1]);
+  printf("---------------------------\n");
+  printf("\n");
+}
+
+//////////////////////////////////////////////
+
+/////////////////TESTS////////////////////////
+
+void test_FieldVide(){
+  struct field * test_field = FieldVide();
+  struct tuille * test_tuille = (struct tuille * )test_field->lst_tutuille->head->data;
+  assert(test_field->lst_triplet->head == NULL);
+  struct tuille tvide = gen_tuile_vide();
+  for (int i = 0;i<PLAYER_MAX;i++){
+    assert(test_field->paysans[i] == 0);
+  }
+  assert(test_field->len == NONE);
+  assert(same_card(&tvide,test_tuille) == TRUE);
+  
+  printf("TEST_FIELD_VIDE\t\t\t:\tCHECK\n");
+}
+
+
+
+
+
+void test_TownVide(){
+  struct city * test_town = TownVide();
+  struct tuille * test_tuille = (struct tuille * )test_town->lst_tutuille->head->data;
+  assert(test_town->lst_champ->head == NULL);
+  struct triplet * test_triplet = (struct triplet * )test_town->lst_triplet->head->data;
+
+  assert(test_triplet->x == NONE);
+  assert(test_triplet->y == NONE);
+  assert(test_triplet->z == NONE);
+  
+  struct tuille tvide = gen_tuile_vide();
+  
+  assert(same_card(&tvide,test_tuille) == TRUE);
+  
+  for (int i = 0;i<PLAYER_MAX;i++){
+    assert(test_town->chevaliers[i] == 0);
+  }
+  assert(test_town->len == NONE);
+  assert(test_town->shield == NONE);
+  assert(test_town->border == NONE);
+  
+  printf("TEST_TOWN_VIDE\t\t\t:\tCHECK\n");
+}
+
+
+
+
+
+
+
+void test_ExtractTown(){
+  //init phase//
+  struct tuille tvide = gen_tuile_vide();
+  struct city * test_town_1[4];
+  struct city * test_town_2[4];
+  struct city * test_town_3[4];
+  struct city * test_town_4[4];
+  for(int i = 0;i<4;i++){
+    test_town_1[i] = TownVide();
+    test_town_2[i] = TownVide();
+    test_town_3[i] = TownVide();
+    test_town_4[i] = TownVide();
+  } 
+  struct tuille center_town = genere_tuille(6);
+  struct tuille double_corner_town = genere_tuille(23);
+  struct tuille corner_town = genere_tuille(34);
+  struct tuille single_town = genere_tuille(15);
+  center_town.position[0] = 10;
+  center_town.position[1] = 10;
+  double_corner_town.position[0] = 20;
+  double_corner_town.position[1] = 20;
+  corner_town.position[0] = 30;
+  corner_town.position[1] = 30;
+  single_town.position[0] = 40;
+  single_town.position[1] = 40;
+  
+
+  //center town tests//
+  assert(ExtractTown(&center_town,test_town_1) == 4);
+  struct lelement * llm_tutuille_town = llm_empty();
+  struct lelement * llm_triplet_town = llm_empty();
+  struct tuille * test_tuille;
+  struct triplet * test_triplet;
+  for (int i = 0;i<4;i++){
+    llm_tutuille_town = test_town_1[i]->lst_tutuille->head;
+    llm_triplet_town = test_town_1[i]->lst_triplet->head;
+    test_tuille = (struct tuille * )llm_tutuille_town->data;
+    test_triplet = (struct triplet * )llm_triplet_town->data;
+    assert(same_card(test_tuille,&center_town) == TRUE);
+    assert(test_triplet->x == 10);
+    assert(test_triplet->y == 10);
+    assert(test_triplet->z == attribut_z_town(i));
+    assert(llm_tutuille_town->next == NULL);
+    assert(llm_triplet_town->next == NULL);
+  }
+
+  //double corner town tests//
+  assert(ExtractTown(&double_corner_town,test_town_2) == 2);
+  for (int i = 0;i<2;i++){
+    llm_tutuille_town = test_town_2[i]->lst_tutuille->head;
+    llm_triplet_town = test_town_2[i]->lst_triplet->head;
+    test_tuille = (struct tuille * )llm_tutuille_town->data;
+    test_triplet = (struct triplet * )llm_triplet_town->data;
+    assert(same_card(test_tuille,&double_corner_town) == TRUE);
+    assert(test_triplet->x == 20);
+    assert(test_triplet->y == 20);
+    assert(test_triplet->z == attribut_z_town(i+2));
+    assert(llm_tutuille_town->next == NULL);
+    assert(llm_triplet_town->next == NULL);
+  }
+  for (int i = 2;i<4;i++){
+    llm_tutuille_town = test_town_2[i]->lst_tutuille->head;
+    llm_triplet_town = test_town_2[i]->lst_triplet->head;
+    test_tuille = (struct tuille * )llm_tutuille_town->data;
+    test_triplet = (struct triplet * )llm_triplet_town->data;
+    assert(same_card(&tvide,test_tuille) == TRUE);
+    assert(test_triplet->x == NONE);
+    assert(test_triplet->y == NONE);
+    assert(test_triplet->z == NONE);
+    assert(llm_tutuille_town->next == NULL);
+    assert(llm_triplet_town->next == NULL);
+  }
+
+  //corner town tests//
+  assert(ExtractTown(&corner_town,test_town_3) == 2);
+  for (int i = 0;i<2;i++){
+    llm_tutuille_town = test_town_3[i]->lst_tutuille->head;
+    llm_triplet_town = test_town_3[i]->lst_triplet->head;
+    test_tuille = (struct tuille * )llm_tutuille_town->data;
+    test_triplet = (struct triplet * )llm_triplet_town->data;
+    assert(same_card(test_tuille,&corner_town) == TRUE);
+    assert(test_triplet->x == 30);
+    assert(test_triplet->y == 30);
+    assert(test_triplet->z == attribut_z_town(i));
+    assert(llm_tutuille_town->next == NULL);
+    assert(llm_triplet_town->next == NULL);
+  }
+  for (int i = 2;i<4;i++){
+    llm_tutuille_town = test_town_3[i]->lst_tutuille->head;
+    llm_triplet_town = test_town_3[i]->lst_triplet->head;
+    test_tuille = (struct tuille * )llm_tutuille_town->data;
+    test_triplet = (struct triplet * )llm_triplet_town->data;
+    assert(same_card(&tvide,test_tuille) == TRUE);
+    assert(test_triplet->x == NONE);
+    assert(test_triplet->y == NONE);
+    assert(test_triplet->z == NONE);
+    assert(llm_tutuille_town->next == NULL);
+    assert(llm_triplet_town->next == NULL);
+  }
+
+  //single town tests//
+  assert(ExtractTown(&single_town,test_town_4) == 1);
+  for (int i = 0;i<1;i++){
+    llm_tutuille_town = test_town_4[i]->lst_tutuille->head;
+    llm_triplet_town = test_town_4[i]->lst_triplet->head;
+    test_tuille = (struct tuille * )llm_tutuille_town->data;
+    test_triplet = (struct triplet * )llm_triplet_town->data;
+    assert(same_card(test_tuille,&single_town) == TRUE);
+    assert(test_triplet->x == 40);
+    assert(test_triplet->y == 40);
+    assert(test_triplet->z == attribut_z_town(i));
+    assert(llm_tutuille_town->next == NULL);
+    assert(llm_triplet_town->next == NULL);
+  }
+  for (int i = 1;i<4;i++){
+    llm_tutuille_town = test_town_4[i]->lst_tutuille->head;
+    llm_triplet_town = test_town_4[i]->lst_triplet->head;
+    test_tuille = (struct tuille * )llm_tutuille_town->data;
+    test_triplet = (struct triplet * )llm_triplet_town->data;
+    assert(same_card(&tvide,test_tuille) == TRUE);
+    assert(test_triplet->x == NONE);
+    assert(test_triplet->y == NONE);
+    assert(test_triplet->z == NONE);
+    assert(llm_tutuille_town->next == NULL);
+    assert(llm_triplet_town->next == NULL);
+  }  
+  
+  printf("TEST_EXTRACT_TOWN\t\t:\tCHECK\n");  
+}
+
+
+
+
+
+
+
+void test_SingleTripletField(){
+  //init phase//
+  struct tuille segment_road_town_1 = genere_tuille(10);
+  struct tuille crossroad_road_town = genere_tuille(32);
+  struct tuille segment_road_town_2 = genere_tuille(26);
+  struct field * field_segment_1 = FieldVide();
+  struct field * field_crossroad = FieldVide();
+  struct field * field_segment_2 = FieldVide();
+  
+  segment_road_town_1.position[0] = 10;
+  segment_road_town_1.position[1] = 10;
+  crossroad_road_town.position[0] = 20;
+  crossroad_road_town.position[1] = 20;
+  segment_road_town_2.position[0] = 30;
+  segment_road_town_2.position[1] = 30;
+  
+  struct lelement * llm_segment_1 = llm_empty();
+  struct lelement * llm_crossroad = llm_empty();
+  struct lelement * llm_segment_2 = llm_empty();
+  llm_segment_1->data = &segment_road_town_1;
+  llm_crossroad->data = &crossroad_road_town;
+  llm_segment_2->data = &segment_road_town_2;
+  
+  lnk_add2(field_segment_1->lst_tutuille,llm_segment_1);
+  lnk_add2(field_crossroad->lst_tutuille,llm_crossroad);
+  lnk_add2(field_segment_2->lst_tutuille,llm_segment_2);
+
+  //segment case//
+  SingleTripletField(segment_road_town_1,field_segment_1);
+
+  struct lelement * llm_triplet = llm_empty();
+  struct triplet * test_triplet;
+  llm_triplet = field_segment_1->lst_triplet->head;
+  test_triplet = (struct triplet * )llm_triplet->data;
+  assert(test_triplet->x == 10);
+  assert(test_triplet->y == 10);
+  assert(test_triplet->z == 0);
+  test_triplet = (struct triplet * )llm_triplet->next->data;
+  assert(test_triplet->x == 10);
+  assert(test_triplet->y == 10);
+  assert(test_triplet->z == 8);
+  assert(llm_triplet->next->next == NULL);
+  
+  //crossroad case//
+  SingleTripletField(crossroad_road_town,field_crossroad);
+
+
+  llm_triplet = field_crossroad->lst_triplet->head;
+  test_triplet = (struct triplet * )llm_triplet->data;
+  assert(test_triplet->x == 20);
+  assert(test_triplet->y == 20);
+  assert(test_triplet->z == 0);
+  test_triplet = (struct triplet * )llm_triplet->next->data;
+  assert(test_triplet->x == 20);
+  assert(test_triplet->y == 20);
+  assert(test_triplet->z == 8);
+  assert(llm_triplet->next->next == NULL);
+
+
+  //curved segment case//
+  SingleTripletField(segment_road_town_2,field_segment_2);
+
+  llm_triplet = field_segment_2->lst_triplet->head;
+  for(int i = 0;i<9;i++){
+    if ((i > 7) || (i < 4)){
+      test_triplet = (struct triplet * )llm_triplet->data;
+      assert(test_triplet->x == 30);
+      assert(test_triplet->y == 30);
+      assert(test_triplet->z == i+3);
+      llm_triplet = llm_triplet->next;
+    }
+  }
+  assert(llm_triplet == NULL);  
+  
+  
+  printf("TEST_SINGLE_TRIPLET_FIELD\t:\tCHECK\n");
+}
+
+
+
+
+
+
+
+
+void test_PluralFieldDouble(){
+  //init phase//
+  struct tuille bridge_town = genere_tuille(18); 
+  struct tuille bridge_s_town = genere_tuille(17);
+  struct tuille corner_full = genere_tuille(34);
+  struct tuille corner_full_road = genere_tuille(39);
+  struct tuille unlinked_d = genere_tuille(21);
+  struct tuille unlinked_d_c = genere_tuille(23);
+
+  struct city * town_1 = TownVide();
+  struct city * town_2 = TownVide();
+  struct city * town_3 = TownVide();
+  struct city * town_4 = TownVide();
+  struct city * town_5 = TownVide();
+  struct city * town_6 = TownVide();
+
+  bridge_town.position[0] = 10;
+  bridge_town.position[1] = 10;
+  bridge_s_town.position[0] = 20;
+  bridge_s_town.position[1] = 20;
+  corner_full.position[0] = 30;
+  corner_full.position[1] = 30;
+  corner_full_road.position[0] = 40;
+  corner_full_road.position[1] = 40;
+  unlinked_d.position[0] = 50;
+  unlinked_d.position[1] = 50;
+  unlinked_d_c.position[0] = 60;
+  unlinked_d_c.position[1] = 60;
+
+  struct lelement * llm_bridge = llm_empty();
+  struct lelement * llm_bridge_s = llm_empty();
+  struct lelement * llm_cor_f = llm_empty();
+  struct lelement * llm_cor_f_r = llm_empty();
+  struct lelement * llm_unl_d = llm_empty();
+  struct lelement * llm_unl_d_c = llm_empty();
+
+  struct triplet bridge_triplet_1 = {10,10,1};
+  struct triplet bridge_triplet_2 = {10,10,7};
+  struct triplet bridge_s_triplet_1 = {20,20,3};
+  struct triplet bridge_s_triplet_2 = {20,20,5};
+  struct triplet corner_triplet_1 = {30,30,1};
+  struct triplet corner_triplet_2 = {30,30,3};
+  struct triplet corner_r_triplet_1 = {40,40,1};
+  struct triplet corner_r_triplet_2 = {40,40,3};
+  struct triplet unlinked_triplet_1 = {50,50,3};
+  struct triplet unlinked_triplet_2 = {50,50,5};
+  struct triplet unlinked_c_triplet_1 = {60,60,7};
+  struct triplet unlinked_c_triplet_2 = {60,60,5};
+
+  struct lelement * llm_1 = llm_empty();
+  struct lelement * llm_2 = llm_empty();
+  struct lelement * llm_3 = llm_empty();
+  struct lelement * llm_4 = llm_empty();
+  struct lelement * llm_5 = llm_empty();
+  struct lelement * llm_6 = llm_empty();
+  struct lelement * llm_7 = llm_empty();
+  struct lelement * llm_8 = llm_empty();
+  struct lelement * llm_9 = llm_empty();
+  struct lelement * llm_10 = llm_empty();
+  struct lelement * llm_11 = llm_empty();
+  struct lelement * llm_12 = llm_empty();
+
+  llm_1->data = &bridge_triplet_1;
+  llm_2->data = &bridge_triplet_2;
+  llm_3->data = &bridge_s_triplet_1;
+  llm_4->data = &bridge_s_triplet_2;
+  llm_5->data = &corner_triplet_1;
+  llm_6->data = &corner_triplet_2;
+  llm_7->data = &corner_r_triplet_1;
+  llm_8->data = &corner_r_triplet_2;
+  llm_9->data = &unlinked_triplet_1;
+  llm_10->data = &unlinked_triplet_2;
+  llm_11->data = &unlinked_c_triplet_1;
+  llm_12->data = &unlinked_c_triplet_2;
+
+  town_1->lst_triplet->head = llm_1;
+  town_1->lst_triplet->tail = llm_1;
+  lnk_add2(town_1->lst_triplet,llm_2);
+  town_2->lst_triplet->head = llm_3;
+  town_2->lst_triplet->tail = llm_3;
+  lnk_add2(town_2->lst_triplet,llm_4);
+  town_3->lst_triplet->head = llm_5;
+  town_3->lst_triplet->tail = llm_5;
+  lnk_add2(town_3->lst_triplet,llm_6);
+  town_4->lst_triplet->head = llm_7;
+  town_4->lst_triplet->tail = llm_7;
+  lnk_add2(town_4->lst_triplet,llm_8);
+  town_5->lst_triplet->head = llm_9;
+  town_5->lst_triplet->tail = llm_9;
+  lnk_add2(town_5->lst_triplet,llm_10);
+  town_6->lst_triplet->head = llm_11;
+  town_6->lst_triplet->tail = llm_11;
+  lnk_add2(town_6->lst_triplet,llm_12);
+
+  town_1->border = 2;
+  town_2->border = 2;
+  town_3->border = 2;
+  town_4->border = 2;
+  
+  llm_bridge->data = &bridge_town;
+  llm_bridge_s->data = &bridge_s_town;
+  llm_cor_f->data = &corner_full;
+  llm_cor_f_r->data = &corner_full_road;
+  llm_unl_d->data = &unlinked_d;
+  llm_unl_d_c->data = &unlinked_d_c;
+
+  lnk_add2(town_1->lst_tutuille,llm_bridge);
+  lnk_add2(town_2->lst_tutuille,llm_bridge_s);
+  lnk_add2(town_3->lst_tutuille,llm_cor_f);
+  lnk_add2(town_4->lst_tutuille,llm_cor_f_r);
+  lnk_add2(town_5->lst_tutuille,llm_unl_d);
+  lnk_add2(town_6->lst_tutuille,llm_unl_d_c);
+
+  struct lelement * llm_field = llm_empty();
+  struct field * test_field;
+  struct tuille * test_tuille;
+  struct lelement * llm_triplet;
+  struct triplet * test_triplet;
+
+  //bridge without shield case//
+  PluralFieldDouble(town_1,bridge_town);
+
+  llm_field = town_1->lst_champ->head;  
+  for(int i = 0;i<2;i++){
+    test_field = (struct field * )llm_field->data;
+    test_tuille = (struct tuille * )test_field->lst_tutuille->head->data;
+    assert(same_card(test_tuille,&bridge_town) == TRUE);
+    llm_triplet = test_field->lst_triplet->head;
+    for(int j = 0;j<3;j++){
+      test_triplet = (struct triplet * )llm_triplet->data;
+      assert(test_triplet->x == 10);
+      assert(test_triplet->y == 10);
+      assert(test_triplet->z == j+i*6+3);
+      if(j < 2){
+	llm_triplet = llm_triplet->next;
+      }
+    }
+    llm_field = llm_field->next;
+  }
+  assert(llm_field == NULL);
+
+  //bridge with shield case//
+  PluralFieldDouble(town_2,bridge_s_town);
+
+  llm_field = town_2->lst_champ->head;  
+  for(int i = 0;i<2;i++){
+    test_field = (struct field * )llm_field->data;
+    test_tuille = (struct tuille * )test_field->lst_tutuille->head->data;
+    assert(same_card(test_tuille,&bridge_s_town) == TRUE);
+    llm_triplet = test_field->lst_triplet->head;
+    for(int j = 0;j<3;j++){
+      test_triplet = (struct triplet * )llm_triplet->data;
+      assert(test_triplet->x == 20);
+      assert(test_triplet->y == 20);
+      assert(test_triplet->z == j+i*6);
+      if(j<2){
+	llm_triplet = llm_triplet->next;
+      }
+    }
+    llm_field = llm_field->next;
+  }
+  assert(llm_field == NULL);
+
+  //corner case//
+  PluralFieldDouble(town_3,corner_full);
+
+  llm_field = town_3->lst_champ->head;
+  for(int i = 0;i<1;i++){
+    test_field = (struct field * )llm_field->data;
+    test_tuille = (struct tuille * )test_field->lst_tutuille->head->data;
+    assert(same_card(test_tuille,&corner_full) == TRUE);
+    llm_triplet = test_field->lst_triplet->head;
+    for(int j = 0;j<6;j++){
+      test_triplet = (struct triplet * )llm_triplet->data;
+      assert(test_triplet->x == 30);
+      assert(test_triplet->y == 30);
+      assert(test_triplet->z == j+i*3+6);
+      if(j < 5){
+	llm_triplet = llm_triplet->next;
+      }
+    }
+    llm_field = llm_field->next;
+  }
+  assert(llm_field == NULL);
+ 
+  //corner case//
+  PluralFieldDouble(town_4,corner_full_road);
+
+  llm_field = town_4->lst_champ->head;
+  for(int i = 0;i<1;i++){
+    test_field = (struct field * )llm_field->data;
+    test_tuille = (struct tuille * )test_field->lst_tutuille->head->data;
+    assert(same_card(test_tuille,&corner_full_road) == TRUE);
+    llm_triplet = test_field->lst_triplet->head;
+    for(int j = 0;j<1;j++){
+      test_triplet = (struct triplet * )llm_triplet->data;
+      assert(test_triplet->x == 40);
+      assert(test_triplet->y == 40);
+      assert(test_triplet->z == j+i*3+6);
+      if(j < 0){
+	llm_triplet = llm_triplet->next;
+      }
+    }
+    llm_field = llm_field->next;
+  }
+  assert(llm_field == NULL);
+
+  //unlinked parallel case//
+  PluralFieldDouble(town_5,unlinked_d);
+
+  llm_field = town_5->lst_champ->head;
+  for(int i = 0;i<1;i++){
+    test_field = (struct field * )llm_field->data;
+    test_tuille = (struct tuille * )test_field->lst_tutuille->head->data;
+    assert(same_card(test_tuille,&unlinked_d) == TRUE);
+    llm_triplet = test_field->lst_triplet->head;
+    for(int j = 0;j<3;j++){
+      test_triplet = (struct triplet * )llm_triplet->data;
+      assert(test_triplet->x == 50);
+      assert(test_triplet->y == 50);
+      assert(test_triplet->z == j+i*6);
+      if(j < 2){
+	llm_triplet = llm_triplet->next;
+      }
+    }
+    llm_field = llm_field->next;
+  }
+  assert(llm_field == NULL);
+
+  //unlinked corner case//
+  PluralFieldDouble(town_6,unlinked_d_c);
+
+  llm_field = town_6->lst_champ->head;
+  for(int i = 0;i<1;i++){
+    test_field = (struct field * )llm_field->data;
+    test_tuille = (struct tuille * )test_field->lst_tutuille->head->data;
+    assert(same_card(test_tuille,&unlinked_d_c) == TRUE);
+    llm_triplet = test_field->lst_triplet->head;
+    for(int j = 0;j<6;j++){
+      test_triplet = (struct triplet * )llm_triplet->data;
+      assert(test_triplet->x == 60);
+      assert(test_triplet->y == 60);
+      assert(test_triplet->z == j);
+      if(j < 5){
+	llm_triplet = llm_triplet->next;
+      }
+    }
+    llm_field = llm_field->next;
+  }
+  assert(llm_field == NULL);
+  
+
+
+  printf("TEST_PLURAL_FIELD_DOUBLE\t:\tCHECK\n");
+}
+
+
+
+
+
+
+
+
+
+void test_PluralFieldTriple(){
+  //init phase//
+  struct tuille entry_town = genere_tuille(46);
+  struct tuille entry_road_town = genere_tuille(49);
+  struct lelement * llm_entry = llm_empty();
+  struct lelement * llm_r_entry = llm_empty();
+  struct city * town_1 = TownVide();
+  struct city * town_2 = TownVide();
+  struct triplet entry_triplet_1 = {10,10,1};
+  struct triplet entry_triplet_2 = {10,10,3};
+  struct triplet entry_triplet_3 = {10,10,5};
+  struct triplet entry_road_triplet_1 = {20,20,1};
+  struct triplet entry_road_triplet_2 = {20,20,3};
+  struct triplet entry_road_triplet_3 = {20,20,5};
+  struct lelement * llm_1 = llm_empty();
+  struct lelement * llm_2 = llm_empty();
+  struct lelement * llm_3 = llm_empty();
+  struct lelement * llm_4 = llm_empty();
+  struct lelement * llm_5 = llm_empty();
+  struct lelement * llm_6 = llm_empty();
+
+  entry_town.position[0] = 10;
+  entry_town.position[1] = 10;
+  entry_road_town.position[0] = 20;
+  entry_road_town.position[1] = 20;
+  
+  llm_1->data = &entry_triplet_1;
+  llm_2->data = &entry_triplet_2;
+  llm_3->data = &entry_triplet_3;
+  llm_4->data = &entry_road_triplet_1;
+  llm_5->data = &entry_road_triplet_2;
+  llm_6->data = &entry_road_triplet_3;
+
+  town_1->lst_triplet->head = llm_1;
+  town_1->lst_triplet->tail = llm_1;
+  lnk_add2(town_1->lst_triplet,llm_2);
+  lnk_add2(town_1->lst_triplet,llm_3);
+  town_2->lst_triplet->head = llm_4;
+  town_2->lst_triplet->tail = llm_4;
+  lnk_add2(town_2->lst_triplet,llm_5);
+  lnk_add2(town_2->lst_triplet,llm_6);
+  
+  llm_entry->data = &entry_town;
+  llm_r_entry->data = &entry_road_town;
+  lnk_add2(town_1->lst_tutuille,llm_entry);
+  lnk_add2(town_2->lst_tutuille,llm_r_entry);
+
+  //entry case//
+  PluralFieldTriple(town_1,entry_town);
+
+  struct lelement * llm_field = llm_empty();
+  struct field * test_field;
+  struct tuille * test_tuille;
+  struct lelement * llm_triplet;
+  struct triplet * test_triplet;
+
+  llm_field = town_1->lst_champ->head;
+  test_field = (struct field * )llm_field->data;
+  test_tuille = (struct tuille * )test_field->lst_tutuille->head->data;
+  assert(same_card(test_tuille,&entry_town) == TRUE);
+  llm_triplet = test_field->lst_triplet->head;
+  for(int j = 0;j<3;j++){
+    test_triplet = (struct triplet * )llm_triplet->data;
+    assert(test_triplet->x == 10);
+    assert(test_triplet->y == 10);
+    assert(test_triplet->z == 6+j);
+    if(j < 2){
+      llm_triplet = llm_triplet->next;
+    }
+  }
+
+  //entry road case//
+  PluralFieldTriple(town_2,entry_road_town);
+
+  llm_field = town_2->lst_champ->head;
+  for(int i = 0;i<2;i++){
+    test_field = (struct field * )llm_field->data;
+    test_tuille = (struct tuille * )test_field->lst_tutuille->head->data;
+    assert(same_card(test_tuille,&entry_road_town) == TRUE);
+    llm_triplet = test_field->lst_triplet->head;
+    test_triplet = (struct triplet * )llm_triplet->data;
+    assert(test_triplet->x == 20);
+    assert(test_triplet->y == 20);
+    assert(test_triplet->z == 6 + i*2);
+    llm_field = llm_field->next;
+  }
+  assert(llm_field == NULL);
+
+  printf("TEST_PLURAL_FIELD_TRIPLE\t:\tCHECK\n");
+}
+
+
+
+
+
+
+void test_InternFusionTown(){
+  struct tuille unlinked_d_c = genere_tuille(23);
+  struct tuille cloister = genere_tuille(5);
+  struct tuille corner_full_road = genere_tuille(39);
+
+  unlinked_d_c.position[0] = 10;
+  unlinked_d_c.position[1] = 10;
+  unlinked_d_c.pion[0][0] = 1;
+  cloister.position[0] = 20;
+  cloister.position[1] = 20;
+  corner_full_road.position[0] = 30;
+  corner_full_road.position[1] = 30;
+  corner_full_road.pion[0][0] = 2;
+
+  struct city * town_1[4];
+  struct city * town_2[4];
+  struct city * town_3[4];
+  for(int i = 0;i<4;i++){
+    town_1[i] = TownVide();
+    town_2[i] = TownVide();
+    town_3[i] = TownVide();
+  }
+
+  ExtractTown(&unlinked_d_c,town_1);
+  ExtractTown(&cloister,town_2);
+  ExtractTown(&corner_full_road,town_3);
+
+  struct lelement * llm_field = llm_empty();
+  struct field * test_field;
+  struct tuille * test_tuille_f;
+  struct lelement * llm_triplet_f;
+  struct triplet * test_triplet_f;  
+
+  struct tuille * test_tuille_t;
+  struct lelement * llm_triplet_t;
+  struct triplet * test_triplet_t;
+
+  //unlinked corner case//
+  assert(InternFusionTown(unlinked_d_c,town_1,2) == 2);
+  
+  for(int i = 0;i<2;i++){
+    test_tuille_t = (struct tuille * )town_1[i]->lst_tutuille->head->data;
+    assert(same_card(test_tuille_t,&unlinked_d_c) == TRUE);
+    llm_triplet_t = town_1[i]->lst_triplet->head;
+    for(int j = 0;j<1;j++){
+      test_triplet_t = (struct triplet * )llm_triplet_t->data;
+      assert(test_triplet_t->x == 10);
+      assert(test_triplet_t->y == 10);
+      assert(test_triplet_t->z == 7 - i*2);
+      if(j < 0){
+	llm_triplet_t = llm_triplet_t->next;
+      }
+    }
+    llm_field = town_1[i]->lst_champ->head;
+    for(int j = 0;j<1;j++){
+      test_field = (struct field * )llm_field->data;
+      test_tuille_f = (struct tuille * )test_field->lst_tutuille->head->data;
+      assert(same_card(test_tuille_f,&unlinked_d_c) == TRUE);
+      llm_triplet_f = test_field->lst_triplet->head;
+      for(int k = 0;k<6;k++){
+	test_triplet_f = (struct triplet * )llm_triplet_f->data;
+	assert(test_triplet_f->x == 10);
+	assert(test_triplet_f->y == 10);
+	assert(test_triplet_f->z == k);
+	if(k < 5){
+	  llm_triplet_f = llm_triplet_f->next;
+	}
+      }
+      llm_field = llm_field->next;
+    }
+    assert(llm_field == NULL);
+  }
+     
+  printf("WARNING IL EST PAS FINI\n");
+  printf("TEST_INTER_FUSION_TOWN\t\t:\tCHECK\n");
+}
+
+
+
+
+
+
+void test_MergeTown(){
+  //init phase//
+  struct city * town_1 = TownVide();
+  struct city * town_2 = TownVide();
+  struct city * town_3 = TownVide();
+
+  struct city * trans_town_1[4];
+  struct city * trans_town_2[4];
+  struct city * trans_town_3[4];
+
+  for(int i = 0;i<4;i++){
+    trans_town_1[i] = TownVide();
+    trans_town_2[i] = TownVide();
+    trans_town_3[i] = TownVide();
+  }
+
+  struct tuille tutuille_1 = genere_tuille(6);
+  struct tuille tutuille_2 = genere_tuille(48);
+  struct tuille tutuille_3 = genere_tuille(10);
+  
+  tutuille_1.position[0] = 10;
+  tutuille_1.position[1] = 10;
+  tutuille_2.position[0] = 11;
+  tutuille_2.position[1] = 10;
+  tutuille_3.position[0] = 10;
+  tutuille_3.position[1] = 9;
+  tutuille_1.pion[0][0] = 1;
+
+  int num1 = ExtractTown(&tutuille_1,trans_town_1);
+  int num2 = ExtractTown(&tutuille_2,trans_town_2);
+  int num3 = ExtractTown(&tutuille_3,trans_town_3);
+
+  InternFusionTown(tutuille_1,trans_town_1,num1);
+  InternFusionTown(tutuille_2,trans_town_2,num2);
+  InternFusionTown(tutuille_3,trans_town_3,num3);
+
+
+  town_1 = trans_town_1[0];
+  town_2 = trans_town_2[0];
+  town_3 = trans_town_3[0];
+
+  struct lelement * llm_tuille;
+  struct tuille * test_tuille;
+  struct lelement * llm_field;
+  struct field * test_field;
+  struct lelement * llm_triplet;
+  struct triplet * test_triplet;
+
+  //1 v 1 tests//
+  MergeTown(town_1,town_2);
+
+  llm_field = town_1->lst_champ->head;
+  
+  llm_tuille = town_1->lst_tutuille->head;
+  test_tuille = (struct tuille * )llm_tuille->data;
+  assert(same_card(test_tuille,&tutuille_1) == TRUE); 
+  llm_tuille = llm_tuille->next;
+  test_tuille = (struct tuille * )llm_tuille->data;
+  assert(same_card(test_tuille,&tutuille_2) == TRUE);
+
+  llm_triplet = town_1->lst_triplet->head;
+  for(int i = 0;i<4;i++){
+    test_triplet = (struct triplet * )llm_triplet->data;
+    assert(test_triplet->x == 10);
+    assert(test_triplet->y == 10);
+    if(i > 1){
+      assert(test_triplet->z == 7 - 2*(i-2));
+    }
+    else{
+      assert(test_triplet->z = 1 + 2*i);
+    }
+    llm_triplet = llm_triplet->next;
+  }
+  for(int i = 0;i<3;i++){
+    test_triplet = (struct triplet * )llm_triplet->data;
+    assert(test_triplet->x == 11);
+    assert(test_triplet->y == 10);
+    assert(test_triplet->z == 1+2*i);
+    if(i > 2){
+      llm_triplet = llm_triplet->next;
+    }
+  }
+  
+  for(int i = 0;i<PLAYER_MAX;i++){
+    if(i == 1){
+      assert(town_1->chevaliers[i] == 1);
+    }
+    else {
+      assert(town_1->chevaliers[i] == 0);
+    }
+  }
+
+
+
+  llm_field = town_1->lst_champ->head;
+  for(int i = 0;i<2;i++){
+    test_field = (struct field * )llm_field->data;
+    assert(same_card((struct tuille * )test_field->lst_tutuille->head->data,&tutuille_2) == TRUE);
+    llm_triplet = test_field->lst_triplet->head;
+    for(int j = 0;j<1;j++){
+      test_triplet = (struct triplet * )llm_triplet->data;
+      assert(test_triplet->x == 11);
+      assert(test_triplet->y == 10);
+      assert(test_triplet->z == 6+2*i);
+    }
+    if(i < 1){
+      llm_field = llm_field->next;
+    }
+  }
+
+
+
+  
+  assert(town_1->len == 2);
+  assert(town_1->shield == 2);
+
+  
+
+
+  printf("TEST_MERGE_TOWN\t\t:\tCHECK\n");
+}
+
+//////////////////////////////////////////////
+
+/////////////////MAIN FUNCTION////////////////
+
+int main(){
+  test_FieldVide();
+  test_TownVide();
+  test_ExtractTown();
+  test_SingleTripletField();
+  test_PluralFieldDouble();
+  test_PluralFieldTriple();
+  test_InternFusionTown();
+  test_MergeTown();
+  return 0;
+}
+
+//////////////////////////////////////////////

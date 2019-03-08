@@ -1,0 +1,817 @@
+#include <stdlib.h>
+#include <stdio.h>
+#include <assert.h>
+
+#include "carte.h"
+#include "link.h"
+#include "updateRoad.h"
+
+////////////Function used to debug////////////
+
+void aff_tuile(struct tuille t){
+  printf("----------tuile-------------\n");
+  printf("type : { ");
+  for(int i =0;i<4;i++){
+    printf("{ ");
+    for(int j=0;j<3;j++){
+      printf("%d, ",t.type[i][j]);
+    }
+    printf("} ");
+  }
+  printf("}\n");
+  printf("pion : { ");
+  for(int i =0;i<4;i++){
+    printf("{ ");
+    for(int j=0;j<3;j++){
+      printf("%d, ",t.pion[i][j]);
+    }
+    printf("} ");
+  }
+  printf("}\n");
+  printf("id : %d\n",t.id);
+  printf("dir : %d\n",t.dir);
+  printf("milieu : %d\n",t.milieu);
+  printf("shield : %d\n",t.shield);
+  printf("position : (%d,%d)\n",t.position[0],t.position[1]);
+  printf("---------------------------\n");
+  printf("\n");
+}
+
+//////////////////////////////////////////////
+
+/////////////////TESTS////////////////////////
+
+void test_RoadVide(){
+  struct road * test_road = RoadVide();
+  struct triplet * nys_test_road = (struct triplet * )test_road->nys_idea->head->data;
+  struct tuille * tuille_test_road = (struct tuille * )test_road->lst_tutuille->head->data;
+  struct tuille tvide = gen_tuile_vide();
+  assert(same_card(&tvide,tuille_test_road) == TRUE);
+  assert(nys_test_road->x == NONE);
+  assert(nys_test_road->y == NONE);
+  assert(nys_test_road->z == NONE);
+  for (int i = 0;i<PLAYER_MAX;i++){
+    assert(test_road->voleurs[i] == 0);
+  }
+  assert(test_road->avencement == NONE);
+  assert(test_road->len == NONE);
+
+  printf("TEST_ROAD_VIDE\t\t:");
+  printf("\x1b[32m" "\tCHECK\n" "\x1b[0m");
+}
+
+
+
+
+
+
+
+
+
+void test_ExtractRoad(){
+  
+  //init phase//
+  struct road * test_road_segment[4];
+  struct road * test_road_crossroads[4];
+  struct road * test_road_single[4];
+  for (int i = 0;i<4;i++){
+    test_road_segment[i] = RoadVide();
+    test_road_crossroads[i] = RoadVide();
+    test_road_single[i] = RoadVide();
+  }
+  struct tuille segment_tuille = genere_tuille(57);
+  struct tuille crossroads_tuille = genere_tuille(70);
+  struct tuille single_tuille = genere_tuille(1);
+  crossroads_tuille.dir = 3;
+  segment_tuille.position[0] = 10;
+  segment_tuille.position[1] = 20;
+  crossroads_tuille.position[0] = 30;
+  crossroads_tuille.position[1] = 40;
+  single_tuille.position[0] = 50;
+  single_tuille.position[1] = 60;
+
+  //segment tests//
+  assert(ExtractRoad(&segment_tuille,test_road_segment) == 2);
+  //first part//
+  struct tuille * test_tuille = (struct tuille * )(test_road_segment[0])->lst_tutuille->head->data;
+  struct triplet * test_triplet = (struct triplet * )(test_road_segment[0])->nys_idea->head->data;
+  assert(same_card(&segment_tuille,test_tuille) == TRUE);
+  assert((test_road_segment[0])->lst_tutuille->taille == 1);
+  assert((test_road_segment[0])->nys_idea->taille == 1);
+  assert(test_tuille->position[0] == 10);
+  assert(test_tuille->position[1] == 20);
+  assert(test_triplet->x == 10);
+  assert(test_triplet->y == 20);
+  assert(test_triplet->z == 1);
+  //second part//
+  test_tuille = (struct tuille * )(test_road_segment[1])->lst_tutuille->head->data;
+  test_triplet = (struct triplet * )(test_road_segment[1])->nys_idea->head->data;
+  assert(same_card(&segment_tuille,test_tuille) == TRUE);
+  assert((test_road_segment[1])->lst_tutuille->taille == 1);
+  assert((test_road_segment[1])->nys_idea->taille == 1);
+  assert(test_tuille->position[0] == 10);
+  assert(test_tuille->position[1] == 20);
+  assert(test_triplet->x == 10);
+  assert(test_triplet->y == 20);
+  assert(test_triplet->z == 7);
+  
+  //single tests//
+  assert(ExtractRoad(&single_tuille,test_road_single) == 1);
+  test_tuille = (struct tuille * )(test_road_single[0])->lst_tutuille->head->data;
+  test_triplet = (struct triplet * )(test_road_single[0])->nys_idea->head->data;
+  assert(same_card(&single_tuille,test_tuille) == TRUE);
+  assert((test_road_single[0])->lst_tutuille->taille == 1);
+  assert((test_road_single[0])->nys_idea->taille == 1);
+  assert(test_tuille->position[0] == 50);
+  assert(test_tuille->position[1] == 60);
+  assert(test_triplet->x == 50);
+  assert(test_triplet->y == 60);
+  assert(test_triplet->z == 7);
+
+  //crossroads tests//
+  assert(ExtractRoad(&crossroads_tuille,test_road_crossroads) == 3);
+
+  //first road//
+  test_tuille = (struct tuille * )(test_road_crossroads[0])->lst_tutuille->head->data;
+  test_triplet = (struct triplet * )(test_road_crossroads[0])->nys_idea->head->data;
+  assert(same_card(&crossroads_tuille,test_tuille) == TRUE);
+  assert((test_road_crossroads[0])->lst_tutuille->taille == 1);
+  assert((test_road_crossroads[0])->nys_idea->taille == 1);
+  assert(test_tuille->position[0] == 30);
+  assert(test_tuille->position[1] == 40);
+  assert(test_triplet->x == 30);
+  assert(test_triplet->y == 40);
+  assert(test_triplet->z == 3);  
+
+  //second road//
+  test_tuille = (struct tuille * )(test_road_crossroads[1])->lst_tutuille->head->data;
+  test_triplet = (struct triplet * )(test_road_crossroads[1])->nys_idea->head->data;
+  assert(same_card(&crossroads_tuille,test_tuille) == TRUE);
+  assert((test_road_crossroads[1])->lst_tutuille->taille == 1);
+  assert((test_road_crossroads[1])->nys_idea->taille == 1);
+  assert(test_tuille->position[0] == 30);
+  assert(test_tuille->position[1] == 40);
+  assert(test_triplet->x == 30);
+  assert(test_triplet->y == 40);
+  assert(test_triplet->z == 7); 
+
+  //third road//
+  test_tuille = (struct tuille * )(test_road_crossroads[2])->lst_tutuille->head->data;
+  test_triplet = (struct triplet * )(test_road_crossroads[2])->nys_idea->head->data;
+  assert(same_card(&crossroads_tuille,test_tuille) == TRUE);
+  assert((test_road_crossroads[2])->lst_tutuille->taille == 1);
+  assert((test_road_crossroads[2])->nys_idea->taille == 1);
+  assert(test_tuille->position[0] == 30);
+  assert(test_tuille->position[1] == 40);
+  assert(test_triplet->x == 30);
+  assert(test_triplet->y == 40);
+  assert(test_triplet->z == 5);  
+  
+  printf("TEST_EXTRACT_ROAD\t:");
+  printf("\x1b[32m" "\tCHECK\n" "\x1b[0m");
+
+}
+
+
+
+
+
+
+
+
+void test_InternFusion(){
+   
+  //init phase//
+  struct road * test_road_segment[4];
+  struct road * test_road_crossroads[4];
+  struct road * test_road_single[4];
+  for (int i = 0;i<4;i++){
+    test_road_segment[i] = RoadVide();
+    test_road_crossroads[i] = RoadVide();
+    test_road_single[i] = RoadVide();
+  }
+  struct tuille segment_tuille = genere_tuille(57);
+  struct tuille crossroads_tuille = genere_tuille(70);
+  struct tuille single_tuille = genere_tuille(1);
+  crossroads_tuille.dir = 3;
+  segment_tuille.position[0] = 10;
+  segment_tuille.position[1] = 20;
+  crossroads_tuille.position[0] = 30;
+  crossroads_tuille.position[1] = 40;
+  single_tuille.position[0] = 50;
+  single_tuille.position[1] = 60;
+
+  //meeples placement//
+  segment_tuille.pion[0][1] = 1;
+  single_tuille.pion[0][0] = 2;
+  crossroads_tuille.pion[1][1] = 3;
+
+  //extract phase//
+  ExtractRoad(&segment_tuille,test_road_segment);
+  ExtractRoad(&crossroads_tuille,test_road_crossroads);
+  ExtractRoad(&single_tuille,test_road_single);
+
+  //segment tests//
+  assert(InternFusion(segment_tuille,test_road_segment,2) == 1);
+  for (int i = 0;i<PLAYER_MAX;i++){
+    if (i == 1){
+      assert(test_road_segment[0]->voleurs[i] == 1);
+    }
+    else {
+      assert(test_road_segment[0]->voleurs[i] == 0);
+    }
+  }
+  assert(test_road_segment[0]->len == 1);
+  assert(test_road_segment[0]->avencement == 0);
+
+  struct tuille * test_tuille = (struct tuille * )(test_road_segment[0])->lst_tutuille->head->data;
+  struct triplet * test_triplet = (struct triplet * )(test_road_segment[0])->nys_idea->head->data;
+  for (int i = 0;i<4;i++){
+    for(int j = 0;j<3;j++){
+      if ((i == 0) && (j == 1)){
+	assert(test_tuille->pion[i][j] == 1);
+      }
+      else {
+	assert(test_tuille->pion[i][j] == NONE);
+      }
+    }
+  }
+  assert(test_triplet->x == 10);
+  assert(test_triplet->y == 20);
+  assert(test_triplet->z == 1);
+  test_triplet = (struct triplet * )(test_road_segment[0])->nys_idea->head->next->data;
+  assert(test_triplet->x == 10);
+  assert(test_triplet->y == 20);
+  assert(test_triplet->z == 7);
+
+  //single tests//
+  assert(InternFusion(single_tuille,test_road_single,1) == 1);
+  for (int i = 0;i<PLAYER_MAX;i++){
+    assert(test_road_single[0]->voleurs[i] == 0);
+  }
+  assert(test_road_single[0]->len == 1);
+  assert(test_road_single[0]->avencement == 1);
+  test_tuille = (struct tuille * )(test_road_single[0])->lst_tutuille->head->data;
+  test_triplet = (struct triplet * )(test_road_single[0])->nys_idea->head->data;
+  for (int i = 0;i<4;i++){
+    for(int j = 0;j<3;j++){
+      if ((i == 0) && (j == 0)){
+	assert(test_tuille->pion[i][j] == 2);
+      }
+      else {
+	assert(test_tuille->pion[i][j] == NONE);
+      }
+    }
+  }
+  assert(test_triplet->x == 50);
+  assert(test_triplet->y == 60);
+  assert(test_triplet->z == 7);
+
+  //crossroads tests//
+  assert(InternFusion(crossroads_tuille,test_road_crossroads,3) == 3);
+
+  //first road//
+  for (int i = 0;i<PLAYER_MAX;i++){
+    if (i == 3){
+      assert(test_road_crossroads[0]->voleurs[i] == 1);
+    }
+    else {
+      assert(test_road_crossroads[0]->voleurs[i] == 0);
+    }
+  }
+  assert(test_road_crossroads[0]->len == 1);
+  assert(test_road_crossroads[0]->avencement == 1);
+  test_tuille = (struct tuille * )(test_road_crossroads[0])->lst_tutuille->head->data;
+  test_triplet = (struct triplet * )(test_road_crossroads[0])->nys_idea->head->data;
+  for (int i = 0;i<4;i++){
+    for(int j = 0;j<3;j++){
+      if ((i == 1) && (j == 1)){
+	assert(test_tuille->pion[i][j] == 3);
+      }
+      else {
+	assert(test_tuille->pion[i][j] == NONE);
+      }
+    }
+  }
+  assert(test_triplet->x == 30);
+  assert(test_triplet->y == 40);
+  assert(test_triplet->z == 3);
+
+  //second road//
+  for (int i = 0;i<PLAYER_MAX;i++){
+    assert(test_road_crossroads[1]->voleurs[i] == 0);
+  }
+  assert(test_road_crossroads[1]->len == 1);
+  assert(test_road_crossroads[1]->avencement == 1);
+  test_tuille = (struct tuille * )(test_road_crossroads[1])->lst_tutuille->head->data;
+  test_triplet = (struct triplet * )(test_road_crossroads[1])->nys_idea->head->data;
+  for (int i = 0;i<4;i++){
+    for(int j = 0;j<3;j++){
+      if ((i == 1) && (j == 1)){
+	assert(test_tuille->pion[i][j] == 3);
+      }
+      else {
+	assert(test_tuille->pion[i][j] == NONE);
+      }
+    }
+  }
+  assert(test_triplet->x == 30);
+  assert(test_triplet->y == 40);
+  assert(test_triplet->z == 7);
+
+  //third road//
+  for (int i = 0;i<PLAYER_MAX;i++){
+    assert(test_road_crossroads[2]->voleurs[i] == 0);
+  }
+  assert(test_road_crossroads[2]->len == 1);
+  assert(test_road_crossroads[2]->avencement == 1);
+  test_tuille = (struct tuille * )(test_road_crossroads[2])->lst_tutuille->head->data;
+  test_triplet = (struct triplet * )(test_road_crossroads[2])->nys_idea->head->data;
+  for (int i = 0;i<4;i++){
+    for(int j = 0;j<3;j++){
+      if ((i == 1) && (j == 1)){
+	assert(test_tuille->pion[i][j] == 3);
+      }
+      else {
+	assert(test_tuille->pion[i][j] == NONE);
+      }
+    }
+  }
+  assert(test_triplet->x == 30);
+  assert(test_triplet->y == 40);
+  assert(test_triplet->z == 5);
+  
+  printf("TEST_INTERN_FUSION\t:");
+  printf("\x1b[32m" "\tCHECK\n" "\x1b[0m");
+}
+
+
+
+
+
+
+void test_MergeRoad(){
+  //init phase//
+  struct road * test_1_road_1 = RoadVide();
+  struct road * test_1_road_2 = RoadVide();
+  struct road * test_2_road_1 = RoadVide();
+  struct road * test_2_road_2 = RoadVide();
+
+  //preparation and begining of the merging tests//
+  struct road * test_road_filer_1[4];
+  struct road * test_road_filer_2[4];
+  for (int i = 0;i<4;i++){
+    test_road_filer_1[i] = RoadVide();
+    test_road_filer_2[i] = RoadVide();
+  }
+  struct tuille test_2_tuille_1 = genere_tuille(57);
+  test_2_tuille_1.position[0] = 10;
+  test_2_tuille_1.position[1] = 10;
+  ExtractRoad(&test_2_tuille_1,test_road_filer_1);
+  InternFusion(test_2_tuille_1,test_road_filer_1,2);
+  struct tuille test_2_tuille_2 = genere_tuille(57);
+  test_2_tuille_2.position[0] = 9;
+  test_2_tuille_2.position[1] = 10;
+  ExtractRoad(&test_2_tuille_2,test_road_filer_2);
+  InternFusion(test_2_tuille_2,test_road_filer_2,2);
+
+  MergeRoad(test_road_filer_1[0],test_road_filer_2[0]);
+
+  for(int i = 0;i<PLAYER_MAX;i++){
+    assert(test_road_filer_1[0]->voleurs[i] == 0);
+  }
+  assert(test_road_filer_1[0]->len == 2);
+  assert(test_road_filer_1[0]->avencement == 0);
+
+  struct road * test_road_filer_3[4];
+  struct road * test_road_filer_4[4];
+  for (int i = 0;i<4;i++){
+    test_road_filer_3[i] = RoadVide();
+    test_road_filer_4[i] = RoadVide();
+  }
+  struct tuille test_2_tuille_3 = genere_tuille(1);
+  test_2_tuille_3.position[0] = 20;  
+  test_2_tuille_3.position[1] = 20;
+  test_2_tuille_3.pion[0][1] = 2;
+  ExtractRoad(&test_2_tuille_3,test_road_filer_3);
+  InternFusion(test_2_tuille_3,test_road_filer_3,1);
+  struct tuille test_2_tuille_4 = genere_tuille(66);
+  test_2_tuille_4.position[0] = 21;
+  test_2_tuille_4.position[1] = 20;
+  test_2_tuille_4.pion[1][1] = 2;
+  test_2_tuille_4.dir = 2;
+  ExtractRoad(&test_2_tuille_4,test_road_filer_4);
+  InternFusion(test_2_tuille_4,test_road_filer_4,2);
+  
+  MergeRoad(test_road_filer_3[0],test_road_filer_4[0]);
+
+  for(int i = 0;i<PLAYER_MAX;i++){
+    if (i == 2){
+      assert(test_road_filer_3[0]->voleurs[i] == 1);
+    }
+    else {
+      assert(test_road_filer_3[0]->voleurs[i] == 0);
+    }
+  }
+  assert(test_road_filer_3[0]->len == 2);
+  assert(test_road_filer_3[0]->avencement == 1);
+  
+  test_2_road_1 = test_road_filer_1[0];
+  test_2_road_2 = test_road_filer_3[0];
+    
+  
+  //null road fusion tests//
+  MergeRoad(test_1_road_1,test_1_road_2);
+  for(int i = 0;i<PLAYER_MAX;i++){
+    assert(test_1_road_1->voleurs[i] == 0);
+  }
+  assert(test_1_road_1->len == 2*NONE);
+  assert(test_1_road_1->avencement == 2*NONE);
+
+  //segment and null road fusion tests//
+  MergeRoad(test_2_road_1,test_2_road_2);
+  for(int i = 0;i<PLAYER_MAX;i++){
+    if (i == 2){
+      assert(test_2_road_1->voleurs[i] == 1);
+    }
+    else {
+      assert(test_2_road_1->voleurs[i] == 0);
+    }
+  }
+  assert(test_2_road_1->len == 4);
+  assert(test_2_road_1->avencement == 1);
+  
+  printf("TEST_MERGE_ROAD\t\t:");
+  printf("\x1b[32m" "\tCHECK\n" "\x1b[0m");
+}
+
+
+
+
+void test_ExternFusion_UpdateRoad(){
+  //init phase//
+  struct boardgame test_board;
+  initialisation_board(&test_board);
+  UpdateRoad(&test_board,test_board.board[72][72]);
+
+  //init tests//
+  struct road * test_road = (struct road * )test_board.roads->head->data;
+  assert(test_board.roads->head->next == NULL);
+  struct tuille * test_tuille = (struct tuille * )test_road->lst_tutuille->head->data;
+  struct triplet * test_triplet = (struct triplet * )test_road->nys_idea->head->data;
+  
+  assert(test_triplet->x == 72);
+  assert(test_triplet->y == 72);
+  assert(test_triplet->z == 1);
+  test_triplet = (struct triplet * )test_road->nys_idea->head->next->data;
+  assert(test_triplet->x == 72);
+  assert(test_triplet->y == 72);
+  assert(test_triplet->z == 7);
+  assert(test_road->nys_idea->head->next->next == NULL);
+
+  assert(same_card(test_tuille,&(test_board.board[72][72])));
+  assert(test_board.roads->head->next == NULL);
+
+  for (int i = 0;i<PLAYER_MAX;i++){
+    assert(test_road->voleurs[i] == 0);
+  }
+  assert(test_road->len == 1);
+  assert(test_road->avencement == 0);
+  
+  //first add tests//
+  //segment case//
+  struct tuille tutuille_1 = genere_tuille(66);
+  tutuille_1.position[0] = 74;
+  tutuille_1.position[1] = 72;
+  tutuille_1.dir = 2;
+  tutuille_1.pion[0][0] = 1;
+  test_board.board[74][72] = tutuille_1;
+  UpdateRoad(&test_board,test_board.board[74][72]);
+
+  test_road = (struct road * )test_board.roads->head->next->data;
+  test_tuille = (struct tuille * )test_road->lst_tutuille->head->data;
+  test_triplet = (struct triplet * )test_road->nys_idea->head->data;
+  
+  assert(test_triplet->x == 74);
+  assert(test_triplet->y == 72);
+  assert(test_triplet->z == 3);
+  test_triplet = (struct triplet * )test_road->nys_idea->head->next->data;
+  assert(test_triplet->x == 74);
+  assert(test_triplet->y == 72);
+  assert(test_triplet->z == 7);
+  assert(test_road->nys_idea->head->next->next == NULL);
+
+  assert(same_card(test_tuille,&(test_board.board[74][72])));
+  assert(test_board.roads->head->next->next == NULL);
+
+   for (int i = 0;i<PLAYER_MAX;i++){
+    assert(test_road->voleurs[i] == 0);
+  }
+  assert(test_road->len == 1);
+  assert(test_road->avencement == 0);
+
+  //single case//
+  struct tuille tutuille_2 = genere_tuille(1);
+  tutuille_2.position[0] = 73;
+  tutuille_2.position[1] = 73;
+  tutuille_2.pion[2][1] = 2;
+  test_board.board[73][73] = tutuille_2;
+  UpdateRoad(&test_board,test_board.board[73][73]);
+
+  test_road = (struct road * )test_board.roads->head->next->next->data;
+  test_tuille = (struct tuille * )test_road->lst_tutuille->head->data;
+  test_triplet = (struct triplet * )test_road->nys_idea->head->data;
+  
+  assert(test_triplet->x == 73);
+  assert(test_triplet->y == 73);
+  assert(test_triplet->z == 7);
+  assert(test_road->nys_idea->head->next == NULL);
+
+  assert(same_card(test_tuille,&(test_board.board[73][73])));
+  assert(test_board.roads->head->next->next->next == NULL);
+
+  for (int i = 0;i<PLAYER_MAX;i++){
+    if (i == 2){
+      assert(test_road->voleurs[i] == 1);
+    }
+    else {
+      assert(test_road->voleurs[i] == 0);
+    }
+  }
+  assert(test_road->len == 1);
+  assert(test_road->avencement == 1);
+
+  //adding segment to one road//
+
+  struct tuille tutuille_3 = genere_tuille(66);
+  tutuille_3.position[0] = 71;
+  tutuille_3.position[1] = 72;
+  tutuille_3.dir = 1;
+  tutuille_3.pion[1][1] = 1;  
+  test_board.board[71][72] = tutuille_3;
+  
+  UpdateRoad(&test_board,test_board.board[71][72]);
+
+  struct lelement * test_llm_road = test_board.roads->head;
+  test_road = (struct road * )test_llm_road->data;
+  struct lelement * test_llm_tuille = test_road->lst_tutuille->head->next;
+  test_tuille = (struct tuille * )test_llm_tuille->data;
+  struct lelement * test_llm_triplet = test_road->nys_idea->head->next->next;
+  test_triplet = (struct triplet * )test_llm_triplet->data;
+
+  assert(test_triplet->x == 71);
+  assert(test_triplet->y == 72);
+  assert(test_triplet->z == 3);
+  test_triplet = (struct triplet * )test_llm_triplet->next->data;
+  assert(test_triplet->x == 71);
+  assert(test_triplet->y == 72);
+  assert(test_triplet->z == 7);
+  assert(test_llm_triplet->next->next == NULL);
+
+  for (int i = 0;i<PLAYER_MAX;i++){
+    if (i == 1){
+      assert(test_road->voleurs[i] == 1);
+    }
+    else {
+      assert(test_road->voleurs[i] == 0);
+    }
+  }
+  assert(test_road->len == 2);
+  assert(test_road->avencement == 0);
+
+  struct tuille tutuille_4 = genere_tuille(66);
+  tutuille_4.position[0] = 71;
+  tutuille_4.position[1] = 73;
+  tutuille_4.dir = 3;
+  test_board.board[71][73] = tutuille_4;
+
+  UpdateRoad(&test_board,test_board.board[71][73]);
+
+  test_llm_tuille = test_llm_tuille->next;
+  test_llm_triplet = test_llm_triplet->next->next;
+  test_tuille = (struct tuille * )test_llm_tuille->data;
+  test_triplet = (struct triplet * )test_llm_triplet->data;
+
+  assert(test_triplet->x == 71);
+  assert(test_triplet->y == 73);
+  assert(test_triplet->z == 3);
+  test_triplet = (struct triplet * )test_llm_triplet->next->data;
+  assert(test_triplet->x == 71);
+  assert(test_triplet->y == 73);
+  assert(test_triplet->z == 7);
+  assert(test_llm_triplet->next->next == NULL);
+
+  for (int i = 0;i<PLAYER_MAX;i++){
+    if (i == 1){
+      assert(test_road->voleurs[i] == 1);
+    }
+    else {
+      assert(test_road->voleurs[i] == 0);
+    }
+  }
+  assert(test_road->len == 3);
+  assert(test_road->avencement == 0);
+
+  //adding single to one road//
+  struct tuille tutuille_5 = genere_tuille(1);
+  tutuille_5.position[0] = 70;
+  tutuille_5.position[1] = 73;
+  test_board.board[70][73] = tutuille_5;
+
+  UpdateRoad(&test_board,test_board.board[70][73]);
+  
+  test_llm_tuille = test_llm_tuille->next;
+  test_llm_triplet = test_llm_triplet->next->next;
+  test_tuille = (struct tuille * )test_llm_tuille->data;
+  test_triplet = (struct triplet * )test_llm_triplet->data;
+  
+  assert(test_triplet->x == 70);
+  assert(test_triplet->y == 73);
+  assert(test_triplet->z == 7);
+  assert(test_llm_triplet->next == NULL);
+
+  for (int i = 0;i<PLAYER_MAX;i++){
+    if (i == 1){
+      assert(test_road->voleurs[i] == 1);
+    }
+    else {
+      assert(test_road->voleurs[i] == 0);
+    }
+  }
+  assert(test_road->len == 4);
+  assert(test_road->avencement == 1);
+  
+  //linking two roads//
+  struct tuille tutuille_6 = genere_tuille(66);
+  tutuille_6.position[0] = 74;
+  tutuille_6.position[1] = 73;
+  tutuille_6.pion[1][1] = 1;
+  tutuille_6.dir = 3;
+  test_board.board[74][73] = tutuille_6;
+
+  UpdateRoad(&test_board,test_board.board[74][73]);
+
+  test_llm_road = test_board.roads->head->next;
+  test_road = (struct road * )test_llm_road->data;
+  test_llm_tuille = test_road->lst_tutuille->head;
+  test_llm_triplet = test_road->nys_idea->head;
+  test_tuille = (struct tuille * )test_llm_tuille->data;
+  test_triplet = (struct triplet * )test_llm_triplet->data;
+
+  assert(same_card(&tutuille_2,test_tuille) == TRUE);
+  test_llm_tuille = test_llm_tuille->next;
+  test_tuille = (struct tuille * )test_llm_tuille->data;
+  assert(same_card(&tutuille_6,test_tuille) == TRUE);
+  test_llm_tuille = test_llm_tuille->next;
+  test_tuille = (struct tuille * )test_llm_tuille->data;
+  assert(same_card(&tutuille_1,test_tuille) == TRUE);
+
+  assert(test_triplet->x == 73);
+  assert(test_triplet->y == 73);
+  assert(test_triplet->z == 7);
+  test_llm_triplet = test_llm_triplet->next;
+  test_triplet = (struct triplet * )test_llm_triplet->data;
+  assert(test_triplet->x == 74);
+  assert(test_triplet->y == 73);
+  assert(test_triplet->z == 3);
+  test_llm_triplet = test_llm_triplet->next;
+  test_triplet = (struct triplet * )test_llm_triplet->data;
+  assert(test_triplet->x == 74);
+  assert(test_triplet->y == 73);
+  assert(test_triplet->z == 7);
+  test_llm_triplet = test_llm_triplet->next;
+  test_triplet = (struct triplet * )test_llm_triplet->data;
+  assert(test_triplet->x == 74);
+  assert(test_triplet->y == 72);
+  assert(test_triplet->z == 3);
+  test_llm_triplet = test_llm_triplet->next;
+  test_triplet = (struct triplet * )test_llm_triplet->data;
+  assert(test_triplet->x == 74);
+  assert(test_triplet->y == 72);
+  assert(test_triplet->z == 7);
+  
+  for (int i = 0;i<PLAYER_MAX;i++){
+    if ((i == 1) || (i == 2)){
+      assert(test_road->voleurs[i] == 1);
+    }
+    else {
+      assert(test_road->voleurs[i] == 0);
+    }
+  }
+  assert(test_road->len == 3);
+  assert(test_road->avencement == 1);
+
+  struct tuille tutuille_7 = genere_tuille(57);
+  tutuille_7.position[0] = 73;
+  tutuille_7.position[1] = 72;
+  test_board.board[73][72] = tutuille_7;
+
+  UpdateRoad(&test_board,test_board.board[73][72]);
+
+  test_llm_road = test_board.roads->head;
+  test_road = (struct road * )test_llm_road->data;
+  test_llm_tuille = test_road->lst_tutuille->head;
+  test_tuille = (struct tuille * )test_llm_tuille->data;
+
+  assert(same_card(&(test_board.board[72][72]),test_tuille) == TRUE);
+  test_llm_tuille = test_llm_tuille->next;
+  test_tuille = (struct tuille * )test_llm_tuille->data;
+  assert(same_card(&tutuille_3,test_tuille) == TRUE);
+  test_llm_tuille = test_llm_tuille->next;
+  test_tuille = (struct tuille * )test_llm_tuille->data;
+  assert(same_card(&tutuille_4,test_tuille) == TRUE);
+  test_llm_tuille = test_llm_tuille->next;
+  test_tuille = (struct tuille * )test_llm_tuille->data;
+  assert(same_card(&tutuille_5,test_tuille) == TRUE);
+  test_llm_tuille = test_llm_tuille->next;
+  test_tuille = (struct tuille * )test_llm_tuille->data;
+  assert(same_card(&tutuille_7,test_tuille) == TRUE);
+  test_llm_tuille = test_llm_tuille->next;
+  test_tuille = (struct tuille * )test_llm_tuille->data;
+  assert(same_card(&tutuille_2,test_tuille) == TRUE);
+  test_llm_tuille = test_llm_tuille->next;
+  test_tuille = (struct tuille * )test_llm_tuille->data;
+  assert(same_card(&tutuille_6,test_tuille) == TRUE);
+  test_llm_tuille = test_llm_tuille->next;
+  test_tuille = (struct tuille * )test_llm_tuille->data;
+  assert(same_card(&tutuille_1,test_tuille) == TRUE);
+
+  test_llm_road = test_board.roads->head;
+  test_road = (struct road * )test_llm_road->data;
+
+  assert(test_llm_road->next == NULL);
+
+  for (int i = 0;i<PLAYER_MAX;i++){
+    if (i == 1){
+      assert(test_road->voleurs[i] == 2);
+    }
+    else if (i == 2) {
+      assert(test_road->voleurs[i] == 1);
+    }
+    else {
+      assert(test_road->voleurs[i] == 0);
+    }
+  }
+  assert(test_road->len == 8);
+  assert(test_road->avencement == 2);
+
+  //cycle tests//
+  struct tuille tutuille_cycle_1 = genere_tuille(66);
+  struct tuille tutuille_cycle_2 = genere_tuille(66);
+  struct tuille tutuille_cycle_3 = genere_tuille(66);
+  struct tuille tutuille_cycle_4 = genere_tuille(66);
+  
+  tutuille_cycle_1.position[0] = 71;
+  tutuille_cycle_1.position[1] = 69;
+
+  tutuille_cycle_2.position[0] = 72;
+  tutuille_cycle_2.position[1] = 69;
+
+  tutuille_cycle_3.position[0] = 72;
+  tutuille_cycle_3.position[1] = 70;
+  
+  tutuille_cycle_4.position[0] = 71;
+  tutuille_cycle_4.position[1] = 70;
+
+  tutuille_cycle_1.dir = 1;
+  tutuille_cycle_2.dir = 2;
+  tutuille_cycle_3.dir = 3;
+  tutuille_cycle_4.dir = 0;
+
+  test_board.board[71][69] = tutuille_cycle_1;
+  UpdateRoad(&test_board,test_board.board[71][69]);
+  test_board.board[72][69] = tutuille_cycle_2;
+  UpdateRoad(&test_board,test_board.board[72][69]);
+  test_board.board[72][70] = tutuille_cycle_3;
+  UpdateRoad(&test_board,test_board.board[72][70]);
+  test_board.board[71][70] = tutuille_cycle_4;
+  UpdateRoad(&test_board,test_board.board[71][70]);
+
+  test_llm_road = test_board.roads->head->next;
+  test_road = (struct road * )test_llm_road->data;
+
+  for (int i = 0;i<PLAYER_MAX;i++){
+    assert(test_road->voleurs[i] == 0);
+  }
+  assert(test_road->len == 4);
+  assert(test_road->avencement == 2);
+
+  printf("TEST_EXTERN_FUSION\t:");
+  printf("\x1b[32m" "\tCHECK\n" "\x1b[0m");
+}
+
+//////////////////////////////////////////////
+
+/////////////////MAIN FUNCTION////////////////
+
+int main()
+{
+  test_RoadVide();
+  test_ExtractRoad();
+  test_InternFusion();
+  test_MergeRoad();
+  test_ExternFusion_UpdateRoad();
+  return 0;
+}
+
+//////////////////////////////////////////////

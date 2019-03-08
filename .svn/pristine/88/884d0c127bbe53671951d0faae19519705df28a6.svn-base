@@ -1,0 +1,187 @@
+#include <stdio.h>
+#include <dlfcn.h>
+#include <stdlib.h>
+#include "carcassonne_interface.h" 
+
+
+#define CARD_MAX 20 
+#define PLAYER_MAX 5
+
+struct player {
+  unsigned int num;
+  unsigned int point;
+  char * name;
+};
+
+/*
+struct lelement {
+  struct lelement * previous;
+  struct lelement *next;
+  struct move data;
+};
+
+
+struct link {
+  struct lelement *first;
+  int size;
+};
+*/
+
+/*struct player {
+  char const * (*PLAYER_NAME)();
+  void (*initialize)(unsigned int, unsigned int);
+  struct move (*play) (enum card_id ,struct move const **,size_t);
+  void (*finalize)();
+};
+*/
+
+struct pile {
+  enum card_id tab[CARD_MAX];
+  int position;
+};
+
+
+struct pile deck;
+
+/*
+struct link *empty_list(void)
+{
+  struct lelement * llm = malloc(sizeof(struct lelement)); 
+  struct link * lk = malloc(sizeof(struct link));
+  lk->first = llm;
+  lk->first->previous = NULL;
+  lk->first->next = NULL;
+  return lk;
+}
+*/
+
+void empty_list(struct move moves[])
+{
+  for(int i=0; i < CARD_MAX; i++) {
+    moves[i].card = -1;
+  }
+}
+
+
+void initialise_player_tab(struct player * players)
+{
+  for (int i = 0; i < 0; i++){
+    players[i].num = i;
+  }
+}
+    
+
+
+void initialise_pile(struct pile * p)
+{
+  p->position = 0;
+  for (int i = 0; i < CARD_MAX; i++){
+    p->tab[i] = rand()%24;
+  }
+}
+
+
+enum card_id draw_card(void)
+{
+  if(deck.position > CARD_MAX - 1)
+    return LAST_CARD;
+  deck.position++;
+  return deck.tab[deck.position-1];
+ }
+
+struct player compute_next_player(struct player players[],int current_position)
+{
+  return players[(current_position + 1)%PLAYER_MAX];
+}
+
+void enqueue(struct move m, struct move moves[])
+{
+  int i = 0;
+  while ((i < CARD_MAX) && (moves[i].card >= 0)) {
+    i++;
+  }
+  moves[i] = m;
+}
+
+
+int main(int argc,char **argv){ 
+  printf("serveur \n");
+  //struct player players[PLAYER_MAX];
+  //int current_player = 0;
+  //struct move PREVIOUS_MOVES[PLAYER_MAX];
+  struct move moves[CARD_MAX];
+  empty_list(moves);
+
+  void * PLAYER;
+  char *error;
+
+  if(argc > PLAYER_MAX){
+    printf("NUMBER OF PLAYERS NOT ALLOWED !\n");
+  }
+  for(int i=1;i<argc;i++) {
+    void (* initialize)(unsigned int,unsigned int);
+    printf("haha\n");
+    struct move (* play)(enum card_id,struct move const[],size_t);
+    void (* finalize)(void);
+
+    PLAYER = dlopen(argv[i],RTLD_LAZY);
+    if(!PLAYER){
+      fputs(dlerror(),stderr);
+      exit(1);
+    }
+
+    initialize = dlsym(PLAYER, "initialize");
+    if( (error = dlerror()) != NULL){
+      fputs(error,stderr);
+      exit(1);
+    }
+
+    play = dlsym(PLAYER, "play");
+    if( (error = dlerror()) != NULL){
+      fputs(error,stderr);
+      exit(1);
+    }
+
+    finalize = dlsym(PLAYER,"finalize");
+    if( (error = dlerror()) != NULL){
+      fputs(error,stderr);
+      exit(1);
+    }
+
+    initialize(argc,PLAYER_MAX);
+
+    /*
+      players[i-1].PLAYER_NAME=dlsym(PLAYER,"get_player_name");
+      players[i-1].initialize=dlsym(PLAYER,"initialize");
+      players[i].play = dlsym(PLAYER,"play");
+      players[i-1].finalize =dlsym(PLAYER,"finalize");
+    */
+    
+    /*
+      printf("The player\' s name is : %s\n",players[i-1].PLAYER_NAME());
+      players[i-1].initialize(i-1,PLAYER_MAX);
+      //moves[i-1] =players[i-1].play(CARD_PLAIN_CITY_ROAD,PREVIOUS_MOVES,0);
+      players[i-1].finalize();
+      dlclose(PLAYER);
+      }
+    */
+    
+    struct move m;
+    int c;
+    //struct player p;
+    int i = 0;
+    while(deck.position < CARD_MAX){
+      c = draw_card();
+      //p = compute_next_player();
+      m = play(c,moves,i);
+      i++;
+      enqueue(m,moves);
+    }
+    for(int i=0;i<PLAYER_MAX;i++){
+      finalize();
+      dlclose(PLAYER);
+    }
+  }
+  return 0;
+}
+

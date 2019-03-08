@@ -1,0 +1,17 @@
+
+/*
+  Modification de finition:
+  -ne prend plus en compte les champs
+  -se rappele à chaque tours
+  L'interet de cette fonction est de pouvoir séparer les cas traités lors de la fin de jeu. Et, potentiellement, faire des disjonctions de cas avec le gain de point.
+*/
+
+void finition_patch(struct boardgame * boboard, struct tuille tutuille);
+
+/*
+  Fonction finalisant le comptage de points lors de la fin de jeu.
+*/
+
+void finition_end_game(struct boardgame * boboard);
+
+static void update_road(struct boardgame * boboard, struct tuille tutuille);

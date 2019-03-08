@@ -1,0 +1,27 @@
+#ifndef LINK_H
+#define LINK_H
+
+
+/** \brief une liste doublement chainé */
+struct link {// a discuter: est ce qu'on rajoute un pointeur vers la queue de la chaine
+  struct lelement * head; /**< le debut de la liste */
+  int taille; /**< la taille de la liste */
+};
+
+/** \brief un element de la liste */
+struct lelement {
+  void * tutuille; /**< la donné de l'element */
+  void * next; /**< l'element suivant */
+  void * previous; /**< l'element precedent */
+};
+
+struct link * lnk_empty();
+struct lelement * llm_empty();
+void lnk_add(struct link * lnk, struct lelement * new_llm);
+int llm_find(struct link * lnk, struct lelement * llm);
+void lnk_free(struct link * lnk);
+void llm_free(struct lelement * llm);
+void lnk_merge(struct link * lnk1, struct link * lnk2);
+
+
+#endif

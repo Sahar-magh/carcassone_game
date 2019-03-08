@@ -1,0 +1,92 @@
+#ifndef CARTE_H
+#define CARTE_H
+#include "src/client/carcassonne_interface.h"
+#include "link.h"
+#define NONE -1000
+#ifndef CARD_MAX
+#define CARD_MAX 72
+#endif
+#define FALSE 0
+#define TRUE 1
+#ifndef PLAYER_MAX
+#define PLAYER_MAX 5
+#endif
+
+/** \brief  l'implementation d'une tuile du jeux */
+
+struct triplet{//utile pour road nys_idea
+  int x;
+  int y;
+  int z;
+};
+
+struct tuille {
+  int type[4][3]; /**< le type de la bordure de la tuile -> North West East South */
+  enum direction dir; /**< orientation de la tuile */
+  int milieu; /**< Le type de ce qu'il y a au milieu de la tuile */
+  int shield; /**< Est ce qu'il y a un bouclier */
+  int position[2]; /**< les coordonnées de la tuile sur le board */
+  int pion[4][3]; /**< Ou est ce qu'il y a un pion ? */
+  int id;
+};
+
+/** \brief la structure correspondant aux champs */
+struct field {
+  struct link * lst_tutuille; /**< la liste des tuiles qui composent le champ */
+  struct link * lst_triplet;
+  int paysans[PLAYER_MAX]; /**< le nombre de pions par joueur dans le champs */
+  int len; /**<la taille du champs (en nombre de tuile)*/
+  int inTown;
+};
+
+/** \brief la structure correspondant aux champs */
+struct road {
+  struct link * lst_tutuille; /**< La listes des tuiles qui composent la route */
+  struct link * nys_idea; // WARNING UPDATE
+  int voleurs[PLAYER_MAX];/**< Le nombre de pions par joueur sur la route */
+  int avencement;/**< L'etat de la route (le nombre d'extremité) */
+  int len; /**< la taille de la route (en nombre de tuile) */
+};
+
+/** \brief la structure correspondant aux ville */
+struct city {
+  struct link * lst_tutuille; /**< La liste des tuilles qui composent la ville */
+  struct link * lst_champ; /**< La liste des champs autour de la ville */
+  struct link * lst_triplet;
+  int chevaliers[PLAYER_MAX]; /**< Nombre de pions par joueur dans la ville */
+  int border; 
+  int len; /**< la taille de la ville (en nombre de tuile) */
+  int shield;
+};
+
+struct abbaye {
+  struct tuille cloister;
+  int voisin;
+  int possesseur;
+};
+
+/** \brief centralise les informations du jeux */
+struct boardgame {
+  //struct player joueurs[PLAYER_MAX]; /**< la liste des joueur */
+  struct tuille board[2*CARD_MAX+1][2*CARD_MAX+1]; /**< le plateau de jeux */
+  struct link * fields; /**< la liste des champs present en jeux */
+  struct link * roads; /**< la liste des routes presentes en jeux */
+  struct link * cities; /**< la liste des villes presente en jeux */
+  struct tuille deck[CARD_MAX]; /**< le deck du jeu */
+  struct link * abbayes; /**< la listes des abbayes presente en jeux */
+  int len; /**< la carte au dessus du deck */
+  int points[PLAYER_MAX];
+};
+
+
+void creer_deck(struct tuille deck[]);
+int display_possibility(struct tuille board[][CARD_MAX * 2 +1], struct tuille  res[], struct tuille tutuille);//int = la taille de res
+struct tuille strat(struct tuille board[][CARD_MAX * 2 + 1], struct tuille possibility[], int len_tab, int len_pos);
+void finition(struct tuille * tab_t, struct tuille tutuille);
+struct tuille identifier(struct move);
+int coincide(int type[], int type_test[]);
+int same_card(struct tuille *tuile1, struct tuille *tuile2);
+void initialisation_board(struct boardgame * board);
+struct tuille gen_tuile_vide();
+struct tuille genere_tuille(int id);
+#endif

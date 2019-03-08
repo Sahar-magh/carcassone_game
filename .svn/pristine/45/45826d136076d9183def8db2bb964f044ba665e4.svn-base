@@ -1,0 +1,162 @@
+#include "meeple.h"
+//////////////////////////
+
+void FreeLstTriplet(struct link * lnk){
+  if(lnk != NULL){
+    struct lelement * current = lnk->head;
+    struct triplet * t = (struct triplet *)current->data;
+    for(int i=0;i<lnk->taille;i++){
+      free(t);
+      if(current->next != NULL)
+	current = current->next;
+      t = (struct triplet *)current->next;
+      if(i<lnk->taille-1)
+	free(current->previous);
+    }
+    free(lnk->tail);
+    free(lnk);
+  }
+}
+
+void FreeLstTuile(struct link * lnk){
+  if(lnk != NULL){
+    struct lelement * current = lnk->head;
+    struct tuille * tutuille = (struct tuille *)current->data;
+    for(int i=0;i<lnk->taille;i++){
+      free(tutuille);
+      if(current->next != NULL)
+	current = current->next;
+      tutuille = (struct tuille *)current->next;
+      if(i<lnk->taille-1)
+	free(current->previous);
+    }
+    free(lnk->tail);
+    free(lnk);
+  }
+}
+
+/////////////////////////////////
+
+void FreeRoad(struct road * route){
+  if(route != NULL){
+    FreeLstTuile(route->lst_tutuille);
+    FreeLstTriplet(route->nys_idea);
+    free(route);
+  }
+}
+
+void FreeRoads(struct link * lnk){
+  if(lnk != NULL){
+    struct lelement * current = lnk->head;
+    if(current != NULL){
+      struct road * route = (struct road *)current->data;
+      for(int i =0;i<lnk->taille;i++){
+	FreeRoad(route);
+	if(current->next != NULL)
+	  current = current->next;
+	route =(struct road *)current->data;
+	if(i<lnk->taille -1)
+	  free(current->previous);
+      }
+      free(lnk->tail);
+      free(lnk);
+    }
+    else
+      free(lnk);
+  }
+}
+
+/////////////////////////////////
+
+void FreeAbbayes(struct link * lnk){
+  if(lnk != NULL){
+    struct lelement * current = lnk->head;
+    if( current != NULL){
+      struct abbaye * cloister = (struct abbaye *)current->data;
+      for(int i =0;i<lnk->taille;i++){
+	free(cloister);
+	if(current->next != NULL)
+	  current = current->next;
+	cloister =(struct abbaye *)current->data;
+	if(i<lnk->taille -1)
+	  free(current->previous);
+      }
+      free(lnk->tail);
+      free(lnk);
+    }
+    else
+      free(lnk);
+  }
+}
+
+////////////////////////////////
+
+void FreeField(struct field * f){
+  if(f != NULL){
+    FreeLstTuile(f->lst_tutuille);
+    FreeLstTriplet(f->lst_triplet);
+    free(f);
+  }
+}
+
+void FreeLstChamp(struct link * lnk){
+  if(lnk != NULL){
+    struct lelement * current = lnk->head;
+    if(current != NULL){
+      struct field * f = (struct field *)current->data;
+      for(int i =0;i<lnk->taille;i++){
+	FreeField(f);
+	if(current->next != NULL)
+	  current = current->next;
+	f =(struct field *)current->data;
+	if(i<lnk->taille -1)
+	  free(current->previous);
+      }
+      free(lnk->tail);
+      free(lnk);
+    }
+    else
+      free(lnk);
+  }
+}
+
+void FreeCity(struct city *c){
+  if(c != NULL){
+    FreeLstTuile(c->lst_tutuille);
+    FreeLstTriplet(c->lst_triplet);
+    FreeLstChamp(c->lst_champ);
+    free(c);
+  }
+}
+
+void FreeCities(struct link * lnk){
+  if(lnk != NULL){
+    struct lelement * current = lnk->head;
+    if(current != NULL){
+      struct city * c = (struct city *)current->data;
+      for(int i =0;i<lnk->taille;i++){
+	FreeCity(c);
+	if(current->next != NULL)
+	  current = current->next;
+	c =(struct city *)current->data;
+	if(i<lnk->taille -1)
+	  free(current->previous);
+      }
+      free(lnk->tail);
+      free(lnk);
+    }
+    else{
+      free(lnk);
+    }
+  }
+}
+
+void FreeBordgame(struct boardgame * boboard){
+  if(boboard != NULL){
+    FreeRoads(boboard->roads);
+    FreeAbbayes(boboard->abbayes);
+    FreeCities(boboard->cities);
+    FreeLstChamp(boboard->fields);
+  }
+}
+

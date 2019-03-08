@@ -1,0 +1,27 @@
+#include <stdlib.h>
+#include <stdio.h>
+#include <SDL.h>
+
+
+int main(){
+  SDL_Init(SDL_INIT_VIDEO);
+  //Cree une fenetre
+  SDL_Surface * fenetre = NULL;
+  fenetre = SDL_CreateRGBSurface(0,500,500,32,0,0,0,0);
+  SDL_FillRect(fenetre,NULL,SDL_MapRGB(fenetre->format,255,0,0));
+  //pseudo infinite boucle
+  while(1){
+    SDL_Event event;
+    SDL_WaitEvent(&event);
+    if(event.type == SDL_QUIT )
+      {
+	break;
+      }
+  }
+  //Liberer la memoire
+  SDL_FreeSurface(fenetre);
+  SDL_Quit();
+  return 0;
+}
+// usr/local/include
+// gcc $(pkg-config sdl2 --cflags) -c .....

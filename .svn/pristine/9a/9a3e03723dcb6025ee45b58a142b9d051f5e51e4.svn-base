@@ -1,0 +1,23 @@
+CONVENTION_DE_CODAGE
+======================================================
+
+*Langue des commentaires de fonction : Français 
+*Langue des commentaires de tests : Anglais
+*Langue du nommage des objet : Franglais
+
+*Nommage des structures :
+	*Fonctions : minuscule / espace symbolisé par '_' ou une majuscule
+		     exemple : FonctionFolle / fonction_folle
+	*Constantes : majuscules / espace symbolisé par '_'
+	*Variables : minuscules / espace symbolisé par '_'
+	*Structures : majuscules
+
+*Commentaires : situés dans les fichiers *.h 
+
+
+CONSTANTE
+======================================================
+
+*TRUE = 1 / FALSE = 0
+*PLAYER_MAX = 5
+*CARD_MAX = 72

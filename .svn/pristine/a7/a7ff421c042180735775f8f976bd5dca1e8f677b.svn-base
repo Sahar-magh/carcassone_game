@@ -1,0 +1,19 @@
+
+/*
+  Modification de finition:
+  -ne prend plus en compte les champs
+  -se rappele à chaque tours
+  L'interet de cette fonction est de pouvoir séparer les cas traités lors de la fin de jeu. Et, potentiellement, faire des disjonctions de cas avec le gain de point.
+*/
+
+void add_tutuille_in_road(struct boardgame * boboard, struct tuille tutuille, int t[3], int test[3]);
+
+void creat_new_road(struct boardgame * boboard, struct tuille tutuille, int t[3]);
+
+int number_side_road(struct tuille tutuille, int sides[4]);
+
+struct road * road_empty();
+
+struct road * find_the_right_road(struct boardgame * boboard, int t[3], int number);
+
+void update_road(struct boardgame * boboard, struct tuille tutuille);

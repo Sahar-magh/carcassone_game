@@ -1,0 +1,20 @@
+\section{Limitations et Contraintes}
+
+La réalisation de ce projet a soulevé de nombreux problèmes, aussi bien algorithmiques, que d'implémentation. 
+
+\vspace{0.5cm}
+
+Premièrement, la généralisation des listes chaînées nous a permet de rajouter et enlever facilement des éléments. Cependant, afin de pouvoir les utiliser avec des types de donnés quelconques, nous étions obligé de caster tous nos pointeurs, faire attention à ne pas faire de listes hétérogènes et augmenter le nombre de pointeurs (déja aloués) à liberer à la fin du programme.
+
+\vspace{0.5cm}
+
+Suite à des contraintes de temps, il nous a été impossible d'implémenter les stratégies détaillées plus haut. Ainsi les tuiles sont choisies aléatoirement parmi la liste des possibilités. De même les algorithmes qui choisissent les pions ont été implémentés, mais n'ont pas pu être intégré correctement à l'ensemble.
+
+De plus, les règles de Carcassonne comporten de nombreuses exceptions et situations ambiguës, ce qui a énormément complexifié la généralisation du code pour les mide à jour. C'est pourquoi, même si on a réussi à séparer les tuiles en plusieurs grosses catégories, certaines disjonctions de cas doivent être traités de manière unique.
+
+Ainsi bien que nous ayons réalisé l'ensemble des fonctions de mise à jour et qu'elles soient testées indépendamment du serveur (et presque intégralement pour les champs), nous avons du, afin d'assurer que l'exécutable soit stable, ne mettre dans le serveur et les clients que updateCloister, updateroad et updatetown.
+
+\vspace{0.5cm}
+
+Cependant, la plus importante limitation/problème de notre réalisation est la complexité en mémoire. En effet, bien que notre complexité en temps soit plutôt acceptable.
+Nos structures prennent énormément de place ce qui nous a causé un débordement de la pile sur le tas. Nous avons réglé ce problème en faisant une allocation dynamique de nos structures. Cependant une meilleure solution aurait été de faire un tableau de tuile et de le parcourir à chaque fois : on passerait d'une complexité en espace de $\mathcal{O}(n^2)$ à $\mathcal{O}(n)$.

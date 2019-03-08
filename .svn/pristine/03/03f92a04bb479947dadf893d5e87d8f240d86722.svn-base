@@ -1,0 +1,72 @@
+#ifndef UPDATE_ROAD_H
+#define UPDATE_ROAD_H
+
+#include <stdlib.h>
+#include <stdio.h>
+
+#include "carte.h"
+#include "link.h"
+#include "Free.h"
+
+//Creer une route vide,initialise une data dans lst_tutuille et dans nys_idea//
+struct road* RoadVide();
+
+//Copie t2 dans t1//
+void copie_tuile(struct tuille * t1, struct tuille * t2);
+
+//Associe à un endroi de la tuile le côté vers lequel il se situe//
+int attribut_z(int i);
+
+//Met dans le tableau une route par extremité (sans se soucier des jonctions)
+int ExtractRoad(struct tuille * tutuille, struct road *roadTuille[]);
+
+//Compte le nombre de route dans une tuile//
+int NumberRoad(struct tuille tutuille);
+
+//Retourne la valeur du meeple d'une route s'il y en a un, sinon NONE//
+int MeepleRoad(struct tuille tutuille, int k);
+
+//Fusionne les routes internes de la tuile ensemble si besoin (seulment pour les coudé et les lignes du coup) et met les extremités et les meeples a terme//
+int InternFusion(struct tuille tutuille, struct road *roadTuille[],int taille);
+
+//Fusionne deux structures routes données en argument//
+void MergeRoad(struct road * r1,struct road * r2);
+
+//Copy la route r2 dans r1//
+void copy_road(struct road * r1, struct road * r2);
+
+//Met les points d'une route dans le plateau de jeu et au bon joueur//
+void CreditPointRoad(struct boardgame * boboard, struct road * route);
+
+//Prend un triplet et renvoie la position de la tuile à côté du triplet//
+struct position DirectionRoad(struct boardgame * boboard,struct triplet t);
+
+//Renvoie VRAI si le triplet appartient à la route et FAUX sinon//
+int FindTripletInRoad(struct road * r,struct triplet * t);
+
+//Renvoie la route qui contient le triplet passé en argument//
+struct road * FindRoad(struct boardgame * boboard, struct triplet * t);
+
+//Fait le travail inverse de attribut_z//
+int Reverse_z(int z);
+
+//Trouve le triplet adjacent au triplet passé en argument//
+struct triplet NextTriplet(struct triplet * t, struct position p, int dir_next, int dir_origine);
+
+//Vide le contenu d'une route, mais ne vide pas les élements qui lui sont associés//
+void RemoveRoad(struct link * roads, struct road * r);
+
+//Rajoute la route dans le plateau de jeu : ici, la route en question ne contient qu'un élement//
+void ExternFusion(struct boardgame * boboard,struct road * route);
+
+//Corps principale du programme : fonction mettant à jour les routes ainsi que les informations associées sur le plateau de jeu//
+void UpdateRoad(struct boardgame * boboard, struct tuille tutuille);
+
+//Fonctions d'affichages//
+void aff_lnk_tuile(struct link * lnk);
+void aff_lnk_nys(struct link * lnk);
+void aff_road(struct road * route);
+
+
+
+#endif

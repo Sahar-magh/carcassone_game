@@ -1,0 +1,25 @@
+#ifndef FREE_H
+#define FREE_H
+
+#include "link.h"
+#include "carte.h"
+
+void FreeLstTriplet(struct link * lnk);
+void FreeLstTuile(struct link * lnk);
+
+void FreeRoad(struct road * route);
+void FreeRoads(struct link * lnk);
+
+void FreeAbbayes(struct link * lnk);
+
+void FreeField(struct field * f);
+
+void FreeLstChamp(struct link * lnk);
+
+void FreeCity(struct city *c);
+void FreeCities(struct link * lnk);
+
+void FreeBordgame(struct boardgame * boboard);
+
+
+#endif

@@ -1,0 +1,104 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include "carcassonne_interface.h"
+#include <time.h>
+#include "../../carte.h"
+#include "../../updateRoad.h"
+
+
+struct boardgame boboard;
+int nb_player;
+int id_player;
+
+
+char const * get_player_name()
+{
+  char const * name = "toto";
+  return name;
+}
+
+void update_board_client(struct move const m[],size_t n_moves){
+  int pos_x;
+  int pos_y;
+  int len = (int)n_moves;//pour enlever les warning
+  if(len < nb_player){
+    for(int i=0;i<len;i++){
+      if(m[i].check == VALID){
+	pos_x = m[i].onto.x;
+	pos_y = m[i].onto.y;
+	boboard.board[pos_x][pos_y] = identifier(m[i]);
+	UpdateRoad(&boboard,identifier(m[i]));
+      }
+    }
+  }
+  else {
+    for(int i = len - nb_player +1; i< len;i++){
+      if(m[i].check == VALID){
+	pos_x = m[i].onto.x;
+	pos_y = m[i].onto.y;
+	boboard.board[pos_x][pos_y] = identifier(m[i]);
+	UpdateRoad(&boboard,identifier(m[i]));
+      }
+    }
+  }
+}
+
+
+struct move play(enum card_id card, struct move const previous_moves[], size_t n_moves)
+{
+  update_board_client(previous_moves,n_moves);
+  struct move m;
+  m.card = card;
+  struct tuille vide = gen_tuile_vide();
+  struct tuille possibility[8*CARD_MAX+8];
+  for(int i =0; i<8*CARD_MAX+8;i++){
+    possibility[i] = vide;
+  }
+  int len_possibility = display_possibility(boboard.board,possibility,identifier(m));
+  for(int i=0;i<len_possibility;i++){
+    //printf("i : %d ,pos : (%d,%d), dir : %d\n", i, possibility[i].position[0], possibility[i].position[1], possibility[i].dir);
+  } 
+  //printf("ppp : %d\n", len_possibility);
+  int possibility_meeple[12];
+  int len_possibility_meeple = 0;  
+  (void)len_possibility_meeple;
+  (void)possibility_meeple;
+  if(len_possibility > 0){
+    int alea = rand()%len_possibility;
+    //len_possibility_meeple = display_meeple(&boboard,&possibility[alea],possibility_meeple);
+    //int alea2 = rand()%len_possibility_meeple;
+    m.check = FAILED;
+    m.player = (unsigned int)id_player;
+    m.onto.x = possibility[alea].position[0];
+    m.onto.y = possibility[alea].position[1];
+    m.dir = possibility[alea].dir;
+    m.place = rand()%12;//possibility_meeple[alea2];
+  }
+  else {
+    m.check = FAILED;
+    m.player = (unsigned int)id_player;
+    m.onto.x = NONE;
+    m.onto.y = NONE;
+    m.dir = NORTH;
+    m.card = LAST_CARD;
+    m.place = NO_MEEPLE;
+  }
+  return m;
+}
+
+
+void initialize(unsigned int id, unsigned int n_players)
+{
+  id_player = (int)id;
+  nb_player = (int)n_players;
+  initialisation_board(&boboard);
+  UpdateRoad(&boboard,boboard.board[72][72]);
+  //printf("initialize check\n");
+}
+
+void finalize()
+{
+  //printf("Le jeu est fini, vous avez perdu!!!\n");
+  //free(player_list);
+}
+

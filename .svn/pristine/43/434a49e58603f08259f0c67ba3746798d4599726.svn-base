@@ -1,0 +1,17 @@
+\section{Introduction}
+
+Le but de ce projet est la modélisation du jeu de société "Caracassonne" en le codant en langage C .
+
+\subsection{Carcassone}
+
+Il s'agit d'un jeu de construction de plateau tour par tour en se basant principalement sur le placement des tuiles. Une tuile peut être composée de villes, champs, abbayes ou routes. Ainsi, le plateau de jeu est initialement composé d'une seule tuile puis se construit au fur et à mesure de la partie. En effet, chaque joueur pioche une tuile et doit la placer dans le plateau du jeu en respectant les tuiles déjà placées.\\
+\indent Lorsqu'un joueur place une tuile, il peut également choisir de placer un pion sur la partie ville champs ou route. Lorsqu'une route ou ville est complétée, les propriétaires de cette dernière peuvent compter leurs points et récupérer leurs pions.\\
+\indent Le jeu se termine lorsque toutes les tuiles sont posées et le joueur avec le plus de points est le gagnant.\\ 
+\subsection {Organisation}
+L'écriture du code a été faite via l'éditeur de texte Emacs et la compilation grâce à  gcc. Le partage du code a été rendu possible par l'outil subversion : svn. Le rapport à été réalisé en Latex grâce à l'outil en ligne sharelatex afin de permettre  son écriture collaborative.
+
+\subsection{Les étapes}
+Ce jeu est modélisé grâce à plein de structures qu'on a définit. On  commencera par aborder nos choix d'implémentation, en précisant la complexité et la corrections des fonctions qui interviennent. Enfin, nous discuterons les fonctions \textsf{'tests'}.
+
+\newpage
+

@@ -1,0 +1,16 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include "carcassonne_interface.h"
+
+char const * get_player_name()
+{
+  char const * name = "toto";
+  return name;
+}
+
+int main()
+{
+  char const * name = get_player_name();
+  printf("%s\n", name);
+  return 0;
+}

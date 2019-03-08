@@ -1,0 +1,19 @@
+#ifndef LINK_H
+#define LINK_H
+
+struct link {
+  struct lelement * head;
+  int taille;
+};
+
+struct lelement {
+  void * tutuille;
+  void * next;
+  void * previous;
+};
+
+struct link * lnk_empty();
+struct lelement * llm_empty();
+void lnk_add(struct link * lnk, struct lelement * new);
+
+#endif

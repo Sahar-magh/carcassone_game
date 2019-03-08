@@ -1,0 +1,19 @@
+#ifndef CARTE_H
+#define CARTE_H
+
+struct tuille {
+  int type[4][3];//N W E S
+  enum direction dir;
+  int milieu;//bool
+  int shield;//bool
+  int position[2];
+  int pion[4][3]; 
+};
+
+void creer_deck(struct tuille deck[]);
+int display_possibility(struct tuille *tab_t[], struct tuille  res[], struct tuille tutuille, int len);//int = la taille de res
+struct tuille strat(struct tuille *tab_t[], struct tuille possibility[], int len_tab, int len_pos);
+void finition(struct tuille * tab_t, int ** res, struct tuille tutuille);
+
+
+#endif

@@ -1,0 +1,33 @@
+CLIENT_DIR=src/client 
+SERVER_DIR=src/serveur
+INSTALL_DIR=install
+
+BIN=client server
+TEST=test
+
+CC=gcc
+CFLAGS=-Wall -Wextra -std=c99
+CPPFLAGSSERVEUR= -I ${SERVER_DIR}
+CFLAGSCLIENT=-shared -I ${CLIENT_DIR}
+
+build: ${BIN}
+
+test: ${TEST}
+	@for e in ${TEST}; do \
+	echo $${e}; ./$${e}; \
+	done
+
+install: server client
+	cp server ${INSTALL_DIR}/ && cp *.so ${INSTALL_DIR}/
+
+clean:
+	rm -rf ${INSTALL_DIR}/server ${INSTALL_DIR}/*.so *.so *.o server
+
+client: src/client/client.c src/client/carcassonne_interface.h
+	${CC} -I src/client ${CFLAGS} -o client client.c -ldl
+
+server.o: src/serveur/server.c  src/serveur/carcassonne_interface.h
+	${CC} ${CPPFLAGSSERVER} ${CFLAGS} serveur.c -c
+
+server: server.o
+	${CC} server.o -o $@

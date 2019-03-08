@@ -1,0 +1,69 @@
+#include <stdlib.h>
+#include <stdio.h>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
+
+void pause()
+{
+  int continuer = 1;
+  SDL_Event event;
+  while (continuer)
+    {
+      SDL_WaitEvent(&event);
+      switch(event.type)
+        {
+	case SDL_QUIT:
+	  continuer = 0;
+	  break;
+	case SDL_KEYDOWN:
+	  continuer = 0;
+	  break;
+        }
+    }
+}
+
+int main(int argc, char *argv[])
+{
+  SDL_Surface *ecran = NULL, *tuile1 = NULL, *t2=NULL;
+  SDL_Rect position_t1;
+  
+  position_t1.x = 350;
+  position_t1.y = 350;
+
+  SDL_Init(SDL_INIT_VIDEO);
+  
+  ecran = SDL_SetVideoMode(1400, 700, 32, SDL_SWSURFACE);// Allocation de la surface
+  
+  SDL_WM_SetCaption("CARCASSONNE THE VIDEO GAME !!!", NULL);
+  
+  SDL_FillRect(ecran, NULL, SDL_MapRGB(ecran->format, 190, 245, 116));
+  
+  tuile1 = IMG_Load("carcas/test.png");
+  SDL_BlitSurface(tuile1, NULL,ecran, &position_t1);
+  SDL_Flip(ecran); // Mise à jour de l'écran
+  position_t1.x = 600;
+  SDL_BlitSurface(tuile1,NULL,ecran, &position_t1);
+  SDL_Flip(ecran); // Mise à jour de l'écran
+  position_t1.y = 200;
+  position_t1.x = 200;
+  SDL_BlitSurface(tuile1,NULL,ecran,&position_t1);
+  SDL_Flip(ecran); // Mise à jour de l'écran
+  SDL_Rect pos;
+  pos.x=500;
+  pos.y=500;
+  t2 = IMG_Load("carcas/test.png");
+  SDL_BlitSurface(t2,NULL,ecran,&pos);
+
+  SDL_Flip(ecran); // Mise à jour de l'écran
+  
+  pause();
+  
+  SDL_FreeSurface(tuile1); // Libération de la surface
+  SDL_Quit();
+  
+  return EXIT_SUCCESS;
+}
+// usr/local/include
+// gcc $(pkg-config sdl2 --cflags) 
+//gcc $(pkg-config sdl2 --libs) test_aff.c
+//gcc test_aff.o `sdl-config --libs --cflags` -lSDL_image -o test_aff 

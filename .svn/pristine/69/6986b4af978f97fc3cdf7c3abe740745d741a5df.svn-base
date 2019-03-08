@@ -1,0 +1,55 @@
+#ifndef UPDATE_TOWN_H
+#define UPDATE_TOWN_H
+
+#include <stdlib.h>
+#include <stdio.h>
+
+#include "carte.h"
+#include "link.h"
+#include "Free.h"
+
+struct field * FieldVide();
+struct city * TownVide();
+void RemoveTown(struct link *cities, struct city *t);
+void copie_tuile_town(struct tuille * t1, struct tuille * t2);
+int attribut_z_town(int i);
+int ExtractTown(struct tuille * tutuille, struct city * townTutuille[]);
+int Reverse_z_town(int z);
+int TownMeeple(struct tuille tutuille, struct triplet * t);
+int NumberRoadTown(struct tuille tutuille);
+int ParcourType(struct tuille tutuille, struct triplet lst_t[]);
+void SingleTripletField(struct tuille tutuille, struct field * f);
+int FieldMeeple(struct tuille tutuille, struct field * f);
+void copie_field(struct field * f1,struct field * f2);
+void SingleField(struct city * town, struct tuille tutuille);
+int NumbBorder(struct tuille tutuille);
+int OppositeTriplet(struct triplet * t1, struct triplet * t2);
+void PluralFieldDouble(struct city * town,struct tuille tutuille);
+void PluralFieldTriple(struct city * town,struct tuille tutuille);
+void PluralField(struct city * town, struct tuille tutuille);
+int InternFusionTown(struct tuille tutuille,struct city *townTutuille[], int taille);
+void copie_town(struct city * t1, struct city * t2);
+struct position DirectionTown(struct boardgame * boboard, struct triplet *t);
+int posDiff(struct position p1, struct position p2);
+int IsDuoTuile(struct city * t);
+void CreditPointTown(struct boardgame * boboard,struct city * t);
+struct triplet NextTripletTown(struct triplet * t, struct position p, int dir_next, int dir_origine);
+void MergeTown(struct city *t1,struct city *t2);
+int FindTripletInTown(struct city * c, struct triplet t);
+struct city * FindTown(struct boardgame *boboard, struct triplet t);
+void SingleExternFusion(struct boardgame * boboard, struct city * town);
+void TabPositionVide(int tab[],struct position junction[],int len,struct boardgame * boboard);
+void DoubleExternFusion(struct boardgame * boboard, struct city * town);
+void TripleExternFusion(struct boardgame * boboard, struct city * town);
+void QuatraExternFusion(struct boardgame * boboard,struct city * town);
+void ExternFusionTown(struct boardgame * boboard, struct city * town);
+
+
+void UpdateTown(struct boardgame * boboard, struct tuille tutuille);
+
+void aff_Town(struct city * town);
+void aff_lnk_field(struct link *lnk);
+void aff_lnk_triplet(struct link * lnk);
+void aff_lnk_tuile_town(struct link * lnk);
+
+#endif

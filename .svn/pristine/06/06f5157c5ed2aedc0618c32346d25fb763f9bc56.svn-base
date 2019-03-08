@@ -1,0 +1,128 @@
+#include <stdlib.h>
+#include <stdio.h>
+#include <assert.h>
+#include "../../link.h"
+
+void test_struct_lnk_empty()
+{
+  printf("  test_struct_lnk_empty : ");
+  struct link * lnk = lnk_empty();
+  assert(lnk != NULL);
+  assert(lnk->head == NULL);
+  assert(lnk->taille == 0);
+  lnk_free(lnk);
+  printf("OK\n");
+}
+
+void test_struct_llm_empty()
+{
+    printf("   test_struct_llm_empty : ");
+    struct lelement * llm = llm_empty();
+    assert(llm != NULL);
+    assert(llm->next == NULL);
+    assert(llm->previous == NULL);
+    assert(llm->tutuille == NULL);
+    llm_free(llm);
+    printf("OK\n");
+}
+
+void test_struct_lnk_add()
+{
+    printf("   test_struct_lnk_add : ");
+    struct link * lnk = lnk_empty();
+
+    struct lelement llm1;
+    struct lelement llm2;
+    struct lelement llm3;
+    int v1 = 1;
+    int v2 = 2;
+    int v3 = 3;
+    llm1.tutuille = &v1;
+    llm1.tutuille = &v2;
+    llm1.tutuille = &v3;
+
+    lnk_add(lnk,&llm1);
+    lnk_add(lnk,&llm2);
+    lnk_add(lnk,&llm3);
+    
+    assert(lnk->head == &llm1);
+    assert(lnk->head->tutuille == &v1);
+
+    assert(lnk->head->next == &llm2);
+    assert(lnk->head->next->tutuille == &v2);
+
+    assert(lnk->head->next->next == &llm3);
+    assert(lnk->head->next->next->tutuille == &v3);
+
+    assert(lnk->taille == 3);
+
+    free(lnk);
+    printf("OK\n");
+}
+
+void test_struct_llm_find()
+{
+    printf("   test_struct_llm_find : ");
+    struct link * lnk = lnk_empty();
+
+    struct lelement llm1;
+    struct lelement llm2;
+    struct lelement llm3;
+    int v1 = 1;
+    int v2 = 2;
+    int v3 = 3;
+    llm1.tutuille = &v1;
+    llm1.tutuille = &v2;
+    llm1.tutuille = &v3;
+    lnk_add(lnk,&llm1);
+    lnk_add(lnk,&llm2);
+
+    assert( llm_find(lnk,llm1) );
+    assert( !llm_find(lnk,llm3) );
+
+    free(lnk);
+    printf("OK\n");
+}
+
+void test_struct_lnk_merge()
+{
+    printf("   test_struct_lnk_merge : ");
+    struct link * lnk1 = lnk_empty();
+    struct link * lnk2 = lnk_empty();
+
+    struct lelement llm1;
+    struct lelement llm2;
+    struct lelement llm3;
+    int v1 = 1;
+    int v2 = 2;
+    int v3 = 3;
+    llm1.tutuille = &v1;
+    llm1.tutuille = &v2;
+    lnk_add(lnk1,&llm1);
+    lnk_add(lnk1,&llm2);
+    lnk_add(lnk2,&llm1);
+    lnk_add(lnk2,&llm2);
+
+    lnk_merge(lnk1,lnk2);
+    assert(lnk1->taille == 4);
+    assert(lnk1->head = &v1);
+    assert(lnk1->head->next = &v2);
+    assert(lnk1->head->next->next = &v1);
+    assert(lnk1->head->next->next->next = &v2);
+    printf("OK\n");
+}
+
+void test_structurel()
+{
+    printf("test_structurel :\n ");
+    test_struct_lnk_empty();
+    test_struct_llm_empty();
+    test_struct_lnk_add();
+    test_struct_llm_find();
+    test_struct_lnk_merge();
+}
+
+int main(){
+    test_structurel();
+    return 0;
+}

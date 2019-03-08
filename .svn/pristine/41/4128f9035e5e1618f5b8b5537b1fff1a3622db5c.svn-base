@@ -1,0 +1,485 @@
+#include <stdlib.h>
+#include <stdio.h>
+
+#include "carte.h"
+
+
+
+static struct tuille genere_tuille(int id){
+  struct tuille tutuille;
+  if(id < 2){
+    int tab[4][3] = {{0,0,0},{0,0,0},{0,0,0},{0,2,0}};//N W E S
+    for (int i=0;i<4;i++) {
+      for (int j=0;j<3;j++) {
+	tutuille.type[i][j] = tab[i][j];
+	tutuille.pion[i][j] = NONE;
+      }
+    }
+    tuille.dir = NORTH;
+    tutuille.milieu = 3;
+    tutuille.shield = 0;
+    tutuille.position[0] = NONE;
+    tutuille.position[1] = NONE;
+  }
+  else if (id < 6) {
+    int tab[4][3] = {{0,0,0},{0,0,0},{0,0,0},{0,0,0}};
+    for (int i=0;i<4;i++) {
+      for (int j=0;j<3;j++) {
+	tutuille.type[i][j] = tab[i][j];
+	tutuille.pion[i][j] = NONE;
+      }
+    }
+    tuille.dir = NORTH;
+    tutuille.milieu = 3;
+    tutuille.shield = 0;
+    tutuille.position[0] = NONE;
+    tutuille.position[1] = NONE;
+  }
+  else if (id < 7) {
+    int tab[4][3] = {{1,1,1},{1,1,1},{1,1,1},{1,1,1}};
+    for (int i=0;i<4;i++) {
+      for (int j=0;j<3;j++) {
+	tutuille.type[i][j] = tab[i][j];
+	tutuille.pion[i][j] = NONE;
+      }
+    }
+    tuille.dir = NORTH;
+    tutuille.milieu = 1;
+    tutuille.shield = 1;
+    tutuille.position[0] = NONE;
+    tutuille.position[1] = NONE;
+  }
+  else if (id < 11) {
+    int tab[4][3] = {{0,2,0},{0,0,0},{1,1,1},{0,2,0}};
+    for (int i=0;i<4;i++) {
+      for (int j=0;j<3;j++) {
+	tutuille.type[i][j] = tab[i][j];
+	tutuille.pion[i][j] = NONE;
+      }
+    }
+    tuille.dir = NORTH;
+    tutuille.milieu = 2;
+    tutuille.shield = 0;
+    tutuille.position[0] = NONE;
+    tutuille.position[1] = NONE;
+  }
+  else if (id < 16) {
+    int tab[4][3] = {{1,1,1},{0,0,0},{0,0,0},{0,0,0}};
+    for (int i=0;i<4;i++) {
+      for (int j=0;j<3;j++) {
+	tutuille.type[i][j] = tab[i][j];
+	tutuille.pion[i][j] = NONE;
+      }
+    }
+    tuille.dir = NORTH;
+    tutuille.milieu = 0;
+    tutuille.shield = 0;
+    tutuille.position[0] = NONE;
+    tutuille.position[1] = NONE;
+  }
+  else if (id < 18) {
+    int tab[4][3] = {{0,0,0},{1,1,1},{1,1,1},{0,0,0}};
+    for (int i=0;i<4;i++) {
+      for (int j=0;j<3;j++) {
+	tutuille.type[i][j] = tab[i][j];
+	tutuille.pion[i][j] = NONE;
+      }
+    }
+    tuille.dir = NORTH;
+    tutuille.milieu = 1;
+    tutuille.shield = 1;
+    tutuille.position[0] = NONE;
+    tutuille.position[1] = NONE;
+  }
+  else if (id < 19) {
+    int tab[4][3] = {{1,1,1},{0,0,0},{0,0,0},{1,1,1}};
+    for (int i=0;i<4;i++) {
+      for (int j=0;j<3;j++) {
+	tutuille.type[i][j] = tab[i][j];
+	tutuille.pion[i][j] = NONE;
+      }
+    }
+    tuille.dir = NORTH;
+    tutuille.milieu = 1;
+    tutuille.shield = 0;
+    tutuille.position[0] = NONE;
+    tutuille.position[1] = NONE;
+  }
+  else if (id < 22) {
+    int tab[4][3] = {{0,0,0},{1,1,1},{1,1,1},{0,0,0}};
+    for (int i=0;i<4;i++) {
+      for (int j=0;j<3;j++) {
+	tutuille.type[i][j] = tab[i][j];
+	tutuille.pion[i][j] = NONE;
+      }
+    }
+    tuille.dir = NORTH;
+    tutuille.milieu = 0;
+    tutuille.shield = 0;
+    tutuille.position[0] = NONE;
+    tutuille.position[1] = NONE;
+  }
+  else if (id < 24) {
+    int tab[4][3] = {{0,0,0},{0,0,0},{1,1,1},{1,1,1}};
+    for (int i=0;i<4;i++) {
+      for (int j=0;j<3;j++) {
+	tutuille.type[i][j] = tab[i][j];
+	tutuille.pion[i][j] = NONE;
+      }
+    }
+    tuille.dir = NORTH;
+    tutuille.milieu = 0;
+    tutuille.shield = 0;
+    tutuille.position[0] = NONE;
+    tutuille.position[1] = NONE;
+  }
+  else if (id < 27) {
+    int tab[4][3] = {{1,1,1},{0,0,0},{0,2,0},{0,2,0}};
+    for (int i=0;i<4;i++) {
+      for (int j=0;j<3;j++) {
+	tutuille.type[i][j] = tab[i][j];
+	tutuille.pion[i][j] = NONE;
+      }
+    }
+    tuille.dir = NORTH;
+    tutuille.milieu = 2;
+    tutuille.shield = 0;
+    tutuille.position[0] = NONE;
+    tutuille.position[1] = NONE;
+  }
+  else if (id < 30) {
+    int tab[4][3] = {{0,2,0},{0,2,0},{1,1,1},{0,0,0}};
+    for (int i=0;i<4;i++) {
+      for (int j=0;j<3;j++) {
+	tutuille.type[i][j] = tab[i][j];
+	tutuille.pion[i][j] = NONE;
+      }
+    }
+    tuille.dir = NORTH;
+    tutuille.milieu = 2;
+    tutuille.shield = 0;
+    tutuille.position[0] = NONE;
+    tutuille.position[1] = NONE;
+  }
+  else if (id < 33) {
+    int tab[4][3] = {{0,2,0},{0,2,0},{1,1,1},{0,2,0}};
+    for (int i=0;i<4;i++) {
+      for (int j=0;j<3;j++) {
+	tutuille.type[i][j] = tab[i][j];
+	tutuille.pion[i][j] = NONE;
+      }
+    }
+    tuille.dir = NORTH;
+    tutuille.milieu = 0;
+    tutuille.shield = 0;
+    tutuille.position[0] = NONE;
+    tutuille.position[1] = NONE;
+  }
+  else if (id < 35) {
+    int tab[4][3] = {{1,1,1},{1,1,1},{0,0,0},{0,0,0}};
+    for (int i=0;i<4;i++) {
+      for (int j=0;j<3;j++) {
+	tutuille.type[i][j] = tab[i][j];
+	tutuille.pion[i][j] = NONE;
+      }
+    }
+    tuille.dir = NORTH;
+    tutuille.milieu = 0;
+    tutuille.shield = 1;
+    tutuille.position[0] = NONE;
+    tutuille.position[1] = NONE;
+  }
+  else if (id < 38) {
+    int tab[4][3] = {{1,1,1},{1,1,1},{0,0,0},{0,0,0}};
+    for (int i=0;i<4;i++) {
+      for (int j=0;j<3;j++) {
+	tutuille.type[i][j] = tab[i][j];
+	tutuille.pion[i][j] = NONE;
+      }
+    }
+    tuille.dir = NORTH;
+    tutuille.milieu = 0;
+    tutuille.shield = 0;
+    tutuille.position[0] = NONE;
+    tutuille.position[1] = NONE;
+  }
+  else if (id < 40) {
+    int tab[4][3] = {{1,1,1},{1,1,1},{0,2,0},{0,2,0}};
+    for (int i=0;i<4;i++) {
+      for (int j=0;j<3;j++) {
+	tutuille.type[i][j] = tab[i][j];
+	tutuille.pion[i][j] = NONE;
+      }
+    }
+    tuille.dir = NORTH;
+    tutuille.milieu = 2;
+    tutuille.shield = 1;
+    tutuille.position[0] = NONE;
+    tutuille.position[1] = NONE;
+  }
+  else if (id < 43) {
+    int tab[4][3] = {{1,1,1},{1,1,1},{0,2,0},{0,2,0}};
+    for (int i=0;i<4;i++) {
+      for (int j=0;j<3;j++) {
+	tutuille.type[i][j] = tab[i][j];
+	tutuille.pion[i][j] = NONE;
+      }
+    }
+    tuille.dir = NORTH;
+    tutuille.milieu = 2;
+    tutuille.shield = 0;
+    tutuille.position[0] = NONE;
+    tutuille.position[1] = NONE;
+  }
+  else if (id < 44) {
+    int tab[4][3] = {{1,1,1},{1,1,1},{1,1,1},{0,0,0}};
+    for (int i=0;i<4;i++) {
+      for (int j=0;j<3;j++) {
+	tutuille.type[i][j] = tab[i][j];
+	tutuille.pion[i][j] = NONE;
+      }
+    }
+    tuille.dir = NORTH;
+    tutuille.milieu = 1;
+    tutuille.shield = 1;
+    tutuille.position[0] = NONE;
+    tutuille.position[1] = NONE;
+  }
+  else if (id < 47) {
+    int tab[4][3] = {{1,1,1},{1,1,1},{1,1,1},{0,0,0}};
+    for (int i=0;i<4;i++) {
+      for (int j=0;j<3;j++) {
+	tutuille.type[i][j] = tab[i][j];
+	tutuille.pion[i][j] = NONE;
+      }
+    }
+    tuille.dir = NORTH;
+    tutuille.milieu = 1;
+    tutuille.shield = 0;
+    tutuille.position[0] = NONE;
+    tutuille.position[1] = NONE;
+  }
+  else if (id < 49) {
+    int tab[4][3] = {{1,1,1},{1,1,1},{1,1,1},{0,2,0}};
+    for (int i=0;i<4;i++) {
+      for (int j=0;j<3;j++) {
+	tutuille.type[i][j] = tab[i][j];
+	tutuille.pion[i][j] = NONE;
+      }
+    }
+    tuille.dir = NORTH;
+    tutuille.milieu = 1;
+    tutuille.shield = 1;
+    tutuille.position[0] = NONE;
+    tutuille.position[1] = NONE;
+  }
+  else if (id < 50) {
+    int tab[4][3] = {{1,1,1},{1,1,1},{1,1,1},{0,2,0}};
+    for (int i=0;i<4;i++) {
+      for (int j=0;j<3;j++) {
+	tutuille.type[i][j] = tab[i][j];
+	tutuille.pion[i][j] = NONE;
+      }
+    }
+    tuille.dir = NORTH;
+    tutuille.milieu = 1;
+    tutuille.shield = 0;
+    tutuille.position[0] = NONE;
+    tutuille.position[1] = NONE;
+  }
+  else if (id < 58) {
+    int tab[4][3] = {{0,2,0},{0,0,0},{0,0,0},{0,2,0}};
+    for (int i=0;i<4;i++) {
+      for (int j=0;j<3;j++) {
+	tutuille.type[i][j] = tab[i][j];
+	tutuille.pion[i][j] = NONE;
+      }
+    }
+    tuille.dir = NORTH;
+    tutuille.milieu = 2;
+    tutuille.shield = 0;
+    tutuille.position[0] = NONE;
+    tutuille.position[1] = NONE;
+  }
+  else if (id < 67) {
+    int tab[4][3] = {{0,0,0},{0,2,0},{0,0,0},{0,2,0}};
+    for (int i=0;i<4;i++) {
+      for (int j=0;j<3;j++) {
+	tutuille.type[i][j] = tab[i][j];
+	tutuille.pion[i][j] = NONE;
+      }
+    }
+    tuille.dir = NORTH;
+    tutuille.milieu = 2;
+    tutuille.shield = 0;
+    tutuille.position[0] = NONE;
+    tutuille.position[1] = NONE;
+  }
+  else if (id < 71) {
+    int tab[4][3] = {{0,0,0},{0,2,0},{0,2,0},{0,2,0}};
+    for (int i=0;i<4;i++) {
+      for (int j=0;j<3;j++) {
+	tutuille.type[i][j] = tab[i][j];
+	tutuille.pion[i][j] = NONE;
+      }
+    }
+    tuille.dir = NORTH;
+    tutuille.milieu = 0;
+    tutuille.shield = 0;
+    tutuille.position[0] = NONE;
+    tutuille.position[1] = NONE;
+  }
+  else {
+    int tab[4][3] = {{0,2,0},{0,2,0},{0,2,0},{0,2,0}};
+    for (int i=0;i<4;i++) {
+      for (int j=0;j<3;j++) {
+	tutuille.type[i][j] = tab[i][j];
+	tutuille.pion[i][j] = NONE;
+      }
+    }
+    tuille.dir = NORTH;
+    tutuille.milieu = 0;
+    tutuille.shield = 0;
+    tutuille.position[0] = NONE;
+    tutuille.position[1] = NONE;
+  }
+}
+
+void creer_deck(struct tuille deck[]){
+  for(int i=0;i<CARD_MAX;i++){
+    deck[i] = genere_tuille(i);
+  }
+  struct tuille tmp;
+  int alea;
+  for(int i=0;i<CARD_MAX;i++){
+    alea = rand()%(CARD_MAX-i) + i;//rand(i,CARDMAX)
+    tmp = deck[i];
+    deck[i] = deck[alea];
+    deck[alea] = tmp;
+  } 
+}
+
+
+struct tuille strat(struct tuille *board[], struct tuille possibility[], int len_tab, int len_pos){
+  struct tuille tutuille;
+  if(len_tab < 1){
+    int tab[4][3] = {{NONE,NONE,NONE},{NONE,NONE,NONE},{NONE,NONE,NONE},{NONE,NONE,NONE}};
+    for (int i=0;i<4;i++) {
+      for (int j=0;j<3;j++) {
+	tutuille.type[i][j] = tab[i][j];
+	tutuille.pion[i][j] = NONE;
+      }
+    }
+    tuille.dir = NORTH;
+    tutuille.milieu = NONE;
+    tutuille.shield = NONE;
+    tutuille.position[0] = NONE;
+    tutuille.position[1] = NONE;
+    return tutuille
+  }
+  else{
+    int rand_tuille = rand()%(len_tab);
+    return possibility[alea];
+  }
+}
+
+static int coincide(int type[], int type_test[]){
+  for(int i=0;i<3;i++){
+    if(!(type_test[i] == NONE || type_test[i]==type[i]))
+      return FALSE;
+  }
+  return TRUE;
+}
+      
+
+static int is_join(struct tuille *board[],int len, struct tuille tutuille,struct tuille test,struct tuille res[]){
+  int taille = 0;
+  int x = test.position[0];
+  int y = test.position[1];
+  //on met la tutuille en haut de test
+  for(int i =0;i<4;i++){
+    if( coincide(tutuille.type[(0+i)%4],(board[x-2][y]).type[3]) && coincide(tutuille.type[(1+i)%4],(board[x-1][y-1]).type[2]) && coincide(tutuille.type[(2+i)%4],(board[x-1][y+1]).type[1]) && coincide(tutuille.type[(3+i)%4],(board[x][y]).type[0])){
+      tutuille.dir = i;
+      tutuille.position[0] = x-1;
+      tutuille.position[1] = y;
+      res[taille] = tutuille;
+      taille++;
+    }
+  }
+  //on met la tutuille à gauche
+  for(int i =0;i<4;i++){
+    if( coincide(tutuille.type[(0+i)%4],(board[x-1][y-1]).type[3]) && coincide(tutuille.type[(1+i)%4],(board[x][y-2]).type[2]) && coincide(tutuille.type[(2+i)%4],(board[x][y]).type[1]) && coincide(tutuille.type[(3+i)%4],(board[x+1][y-1]).type[0])){
+      tutuille.dir = i;
+      tutuille.position[0] = x;
+      tutuille.position[1] = y-1;
+      res[taille] = tutuille;
+      taille++;
+    }
+  }
+  //on met la tutuille à droite
+  for(int i =0;i<4;i++){
+    if( coincide(tutuille.type[(0+i)%4],(board[x-1][y+1]).type[3]) && coincide(tutuille.type[(1+i)%4],(board[x][y]).type[2]) && coincide(tutuille.type[(2+i)%4],(board[x][y+2]).type[1]) && coincide(tutuille.type[(3+i)%4],(board[x+1][y+1]).type[0])){
+      tutuille.dir = i;
+      tutuille.position[0] = x;
+      tutuille.position[1] = y+1;
+      res[taille] = tutuille;
+      taille++;
+    }
+  }
+  //on met la tutuille en bas
+  for(int i =0;i<4;i++){
+    if( coincide(tutuille.type[(0+i)%4],(board[x][y]).type[3]) && coincide(tutuille.type[(1+i)%4],(board[x+1][y-1]).type[2]) && coincide(tutuille.type[(2+i)%4],(board[x+1][y+1]).type[1]) && coincide(tutuille.type[(3+i)%4],(board[x+2][y]).type[0])){
+      tutuille.dir = i;
+      tutuille.position[0] = x+1;
+      tutuille.position[1] = y;
+      res[taille] = tutuille;
+      taille++;
+    }
+  }
+  return taille;
+}
+
+static int is_free(struct tuille *board[],int len,int x,int y){
+  int bool = 0;
+  if( (board[x+1][y]).milieu == NONE )
+    bool++;
+  else if(  (board[x-1][y]).milieu == NONE )
+    bool++;
+  else if(  (board[x][y+1]).milieu == NONE )
+    bool++;
+  else (  (board[x][y-1]).milieu == NONE )
+    bool++;
+  return bool;
+}
+
+int display_possibility(struct tuille *board[], struct tuille res[],  struct tuille tutuille, int len){//int = la taille de res
+  int taille = 0;
+  for(int i=0;i<len;i++){
+    for(int j=0;j<len;j++){
+      if(is_free(board,len,i,j))
+	taille += is_join(board,len,tutuille,board[i][j],res);
+    }
+  }
+  return taille;
+}
+
+
+static void update_road(struct boardgame * boboard, struct tuille tutuille){
+  int x = tutuille.position[0];
+  int y = tutuille.position[1];
+  if(tutuille.type[0][(1+tutuille.dir)%4] == 2){
+    if(boboard->board[x][y]
+
+void finition (struct boardgame * boboard, struct tuille tutuille) 
+{
+  boboard->board[tutuille.position[0]][tutuille.position[1]] = tutuille;
+  update_roads(boboard,tutuille);
+  update_cities(boboard,tutuille);
+  update_fields(boboard,tutuille);
+
+}
+
+int main(){
+
+  return 0;
+}

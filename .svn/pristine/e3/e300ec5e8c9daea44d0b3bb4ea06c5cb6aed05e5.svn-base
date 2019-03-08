@@ -1,0 +1,9 @@
+#include <stdio.h>
+#include "carcassonne_interface.h" 
+#include <dlfcn.h>
+
+int main()
+{
+  char * name = client.get_player_name();
+  return 0;
+}

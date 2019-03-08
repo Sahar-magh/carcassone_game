@@ -1,0 +1,56 @@
+#ifndef CARTE_H
+#define CARTE_H
+
+struct tuille {
+  int type[4][3];//N W E S
+  enum direction dir;
+  int milieu;//bool
+  int shield;//bool
+  int position[2]; //position sur le plateau de jeu
+  int pion[4][3]; //où est-il positionné?
+};
+
+struct link {
+  struct lelement * head;
+  int taille;
+};
+
+struct lelement {
+  void * tuille;
+  void * next;
+  void * previous;
+};
+
+struct field {
+  struct link * lst_tutuille; //lst chainé des tuilles qui composent le champs
+  int paysans[PLAYER_MAX];//nombre de poins par joueur dans le champs
+};
+
+struct road {
+  struct link * lst_tutuille;//lst chainé des tuilles de la routes
+  int paysans[PLAYER_MAX];//nombre de poins par joueur sur la route
+  int fini; //0 si non fini, 1 sinon
+};
+
+struct city {
+  struct link * lst_tutuille; //une lst chainé des tuilles qui composent la ville 
+  struct link * lst_champ; //un tableau de lst chainé de champs
+  int paysans[PLAYER_MAX]; //nombre de poins par joueur dans la ville
+  int fini; //0 si non fini, 1 sinon
+};
+
+struct boardgame {
+  struct player joueur[PLAYER_MAX];
+  struct tuille board[2*CARD_MAX+1][2*CARD_MAX+1];
+  struct link * fields; //lst chainé des champs
+  struct link * roads; //lst chainé des routes
+  struct link * cities; //lst chainé des villes
+};
+
+void creer_deck(struct tuille deck[]);
+int display_possibility(struct tuille *tab_t[], struct tuille  res[], struct tuille tutuille, int len);//int = la taille de res
+struct tuille strat(struct tuille *tab_t[], struct tuille possibility[], int len_tab, int len_pos);
+void finition(struct tuille * tab_t, int ** res, struct tuille tutuille);
+
+
+#endif

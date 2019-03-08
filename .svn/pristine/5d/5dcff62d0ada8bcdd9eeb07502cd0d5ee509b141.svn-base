@@ -1,0 +1,297 @@
+#include <stdlib.h>
+#include <stdio.h>
+
+#include "carte.h"
+#include "link.h"
+
+/*
+void finition_patch (struct boardgame * boboard, struct tuille tutuille)
+{
+  boboard->board[tutuille.position[0]][tutuille.position[1]] = tutuille;
+  update_roads(boboard,tutuille);
+  update_cities(boboard,tutuille);
+}
+
+void finition_end_game (struct boardgame * boboard)
+{
+  update_roads_end_game(boboard);
+  update_cities_end_game(boboard);
+  update_fields_end_game(boboard);
+}
+*/
+
+static void add_tutuille_in_road(struct boardgame * boboard, struct tuille tutuille, int t[3], int test[3])
+{
+  struct road * this_one = find_the_right_road(boboard,test,0);
+  struct lelement * llm1 = llm_empty();
+  struct lelement * llm2 = llm_empty();
+  llm1->tutuille = &tutuille;
+  llm2->tutuille = t;
+  lnk_add(this_one->lst_tutuille,llm1);
+  lnk_add(this_one->nys_idea,llm2);
+}
+
+static void creat_new_road(struct boardgame * boboard, struct tuille tutuille, int t[3])
+{
+  struct lelement * llm1 = llm_empty();
+  struct lelement * llm2 = llm_empty();
+  struct road * road = road_empty();
+  struct lelement * contain = llm_empty();
+  llm1->tutuille = &tutuille;
+  lnk_add(road->lst_tutuille,llm1);
+  llm2->tutuille = t;
+  lnk_add(road->nys_idea,llm2);
+  contain->tutuille = road;
+  lnk_add(boboard->roads,contain);
+}
+
+static int number_side_road(struct tuille tutuille, int sides[4])
+{
+
+
+
+//les valeurs (booléens) dans sides son liée aux cotés qui possèdent les routes, indépendement de l'inclinaison (par rapport au plateau et non à la tuille)
+
+
+  int cpt = 0;
+  for (int i = 0; i<4 ; i++) {
+    if(tutuille.type[(i+tutuille.dir)%4][1] == 2) {
+      cpt++ ;
+      sides[i] = 1;
+    }
+  }
+  return cpt;
+}
+
+static struct road * road_empty()
+{
+  struct road * new_road;
+  new_road->lst_tutuille->head = NULL;
+  new_road->nys_idea->head = NULL;
+  for (int i = 0; i<PLAYER_MAX ; i++) {
+    new_road->voleurs[i] = 0;
+  }
+  new_road->avencement = 0;
+  new_road->len = 0;
+  return new_road;
+}
+
+static struct road * find_the_right_road(struct boardgame * boboard, int t[3], int number)
+{
+  int cpt = 0;
+  struct lelement * current = boboard->roads->head;
+  struct road * transition = (struct road * )current->tutuille;
+  int * cmp = (int * )transition->nys_idea->head->tutuille;
+  while (cmp != NULL) {
+    if((t[0] == cmp[0]) && (t[1] == cmp[1]) && (t[2] == cmp[2])) {
+      cpt ++;
+    }
+  }
+  while ((current != NULL) && (cpt <= number)) {
+    current = current->next;
+    transition = (struct road * )current->tutuille;
+    cmp = (int * )transition->nys_idea->head->tutuille;
+    while (cmp != NULL) {
+      if((t[0] == cmp[0]) && (t[1] == cmp[1]) && (t[2] == cmp[2])) {
+	cpt ++;
+      }
+    } 
+  }
+return (struct road * )current->tutuille;
+}
+
+static void update_road(struct boardgame * boboard, struct tuille tutuille){
+  int x = tutuille.position[0];
+  int y = tutuille.position[1];
+  int sides[4] = {0,0,0,0};
+  int route = number_side_road(tutuille,sides);
+  if (route == 0) {
+      return;
+    }
+  else if(route == 2) {
+    int cpt=0;
+    int p0[2] = {x-1,y};
+    int p1[2] = {x,y-1};
+    int p2[2] = {x+1,y};
+    int p3[2] = {x,y+1};
+    int ** pos;
+    pos[0] = p0;
+    pos[1] = p1;
+    pos[2] = p2;
+    pos[3] = p3;
+    for(int i=0;i<4;i++) {
+      if((sides[i] == 1) && (boboard->board[pos[i][0]][pos[i][1]].milieu == NONE)) {
+	cpt ++;
+	sides[i] = 2;// pour dire qu'il y a une route et il y a bien une autre tuille adjacente 
+      }
+    }
+    if (cpt == 0) {
+      //creation d'une nouvelle route qui contient la tuille tutuille 
+      
+      struct link * lnk = lnk_empty();
+      struct lelement * llm = llm_empty();
+      struct road * road = road_empty();
+      struct lelement * contain = llm_empty();
+      llm->tutuille = &tutuille;
+      lnk_add(lnk,llm);
+      road->lst_tutuille = lnk;
+      for (int i = 0; i<4 ; i++) {
+	if(sides[i] == 1) {
+	  struct lelement * llm = llm_empty();
+	  int t[3] = {x,y,i};
+	  llm->tutuille = t;
+	  lnk_add(road->nys_idea,llm);
+	}
+      }
+      contain->tutuille = road;
+      lnk_add(boboard->roads,contain);
+    }
+    else if (cpt == 1) { //il faut ajouter la tuille a la route de la tuille adjacente 
+      int side1=0; //avec une tuille en contacte
+      int side2=0; //sans tuille en contacte
+      for (int i = 0; i < 4 ; i++) {
+	if (sides[i] == 2) {
+	  side1 = i;
+	}
+	else if (sides[i] == 1) {
+	  side2 = i;
+	}
+      }
+      
+      
+      int t1[3] = {x,y,side1};
+      int t2[3] = {x,y,side2};
+      int test[3] = {pos[side1][0],pos[side1][1],side1};
+      struct road * this_one = find_the_right_road(boboard,test,0); // trouve la route à laquelle la tuille appartient
+      
+      
+      struct lelement * llm1 = llm_empty();
+      struct lelement * llm2 = llm_empty();
+      struct lelement * llm3 = llm_empty();
+      llm1->tutuille = &tutuille;
+      llm2->tutuille = t1;
+      llm3->tutuille = t2;
+      lnk_add(this_one->lst_tutuille,llm1);
+      lnk_add(this_one->nys_idea,llm2);
+      lnk_add(this_one->nys_idea,llm3);
+    }
+    else {
+      int side1=-1;
+      int side2=-1;
+      for (int i = 0; i < 4 ; i++) {
+	if ((sides[i] == 1) && (side1 >= 0)) {
+	  side2 = i;
+	}
+	else {
+	  side1 = i;
+	}
+      }
+      
+      
+      int t1[3] = {x,y,side1};
+      int t2[3] = {x,y,side2};
+      int test1[3] = {pos[side1][0],pos[side1][1],side1};
+      int test2[3] = {pos[side2][0],pos[side2][1],side2};
+      struct road * this_one1 = find_the_right_road(boboard,test1,0);
+      struct road * this_one2 = find_the_right_road(boboard,test2,1);
+      
+      
+      struct lelement * llm1 = llm_empty();
+      struct lelement * llm2 = llm_empty();
+      struct lelement * llm3 = llm_empty();
+      llm1->tutuille = &tutuille;
+      llm2->tutuille = t1;
+      llm3->tutuille = t2;
+      lnk_add(this_one1->lst_tutuille,llm1);
+      lnk_add(this_one1->nys_idea,llm2);
+      lnk_add(this_one1->nys_idea,llm3);
+      
+      
+      lnk_merge(this_one1->lst_tutuille,this_one2->lst_tutuille);
+      lnk_merge(this_one1->nys_idea,this_one2->nys_idea);
+      this_one1->avencement += this_one2->avencement;
+      this_one1->len += this_one2->len + 1;
+      for (int i = 0; i < PLAYER_MAX ; i++) {
+	this_one1->voleurs[i] += this_one2->voleurs[i];
+      }
+      free(this_one2);
+      
+      
+      
+      // il faut taiter les cas : soit on peut former une seule route en ajoutant la tuille soit on choit juste une , 
+      //add tuille a l'une des routes 
+      //prendre les autres tuille de l'autre coté et former une seule route finalement ; merge 
+    }
+    
+  }
+  else {
+    if(tutuille.type[(0+tutuille.dir)%4][1] == 2){ // le cas ou  la tuille n'est relié à rien , on cree une nouvelle struct road ou l'on rajoute la tuille et on l'ajoute a la liste des roads 
+      int t[3] = {x,y,(0+tutuille.dir)%4};
+      if(boboard->board[x-1][y].milieu == NONE){
+        creat_new_road(boboard,tutuille,t);
+      }
+      else { //sinon si la tuille est deja relié 
+	int test[3] = {x-1,y,(0+tutuille.dir)%4};
+        add_tutuille_in_road(boboard,tutuille,t,test);
+      }
+    }
+    if(tutuille.type[(1+tutuille.dir)%4][1] == 2) {
+      int t[3] = {x,y,(1+tutuille.dir)%4};
+      if(boboard->board[x][y-1].milieu == NONE) {
+        creat_new_road(boboard,tutuille,t);
+      }
+      else { //sinon si la tuille est deja relié 
+	int test[3] = {x,y-1,(1+tutuille.dir)%4};
+        add_tutuille_in_road(boboard,tutuille,t,test);
+      } 
+    }  
+    if(tutuille.type[(2+tutuille.dir)%4][1] == 2) {
+      int t[3] = {x,y,(2+tutuille.dir)%4};
+      if(boboard->board[x+1][y].milieu == NONE) {
+        creat_new_road(boboard,tutuille,t);
+      }
+      else { //sinon si la tuille est deja relié 
+	int test[3] = {x+1,y,(2+tutuille.dir)%4};
+        add_tutuille_in_road(boboard,tutuille,t,test);
+      }
+    }
+    if(tutuille.type[(3+tutuille.dir)%4][1] == 2) {
+      int t[3] = {x,y,(3+tutuille.dir)%4};
+      if(boboard->board[x][y+1].milieu == NONE) {
+        creat_new_road(boboard,tutuille,t);
+      }
+      else { //sinon si la tuille est deja relié 
+	int test[3] = {x,y+1,(3+tutuille.dir)%4};
+	add_tutuille_in_road(boboard,tutuille,t,test);
+      }
+    }
+  }
+}
+
+
+/*
+void create_new_road(struct board boboard, struct tuille tutuille);
+*/
+
+/*
+static void update_road(struct boardgame * boboard, struct tuille tutuille){
+  int  t[4] = {0,0,0,0}; //t[i] prendra la valeur de 1 si le coté i de la tuille possède une route {N,W,S,E}
+  int cmp = number_side_road(tutuille,t);
+  int x = tutuille.position[0], y = tutuille.position[1];
+  switch (cmp) //en fct du nb de coté disposant d'une route
+    {
+    case 1:
+      switch (tutuille.dir)
+	{
+	case 0:
+	  if (boboard->board[x+1][y] == NULL) { //s'il n'y a aucune tuille)
+	    create_new_road(boboard,tutuille);
+	  }
+	  else { //s'il y a une tuille 
+	    
+}
+*/
+int main()
+{
+  return 0;
+}

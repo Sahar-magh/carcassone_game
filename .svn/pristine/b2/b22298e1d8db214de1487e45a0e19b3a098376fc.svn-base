@@ -1,0 +1,40 @@
+CLIENT_DIR=src/client
+SERVER_DIR=src/serveur
+INSTALL_DIR=install
+
+BIN=client server
+TEST=test
+
+CC=gcc
+CFLAGS=-Wall -Wextra -std=c99
+CSHARE=-fPIC -shared
+
+build: ${BIN}
+
+test: ${TEST}
+	@for e in ${TEST}; do \
+	echo $${e}; ./$${e}; \
+	done
+
+install: server client
+	cp server ${INSTALL_DIR}/ && cp *.so ${INSTALL_DIR}/
+
+clean:
+	@rm -rf ${INSTALL_DIR}/server ${INSTALL_DIR}/*.so *.so *.o server
+
+client: ${CLIENT_DIR}/client.c ${CLIENT_DIR}/carcassonne_interface.h
+	${CC} ${CFLAGS} ${CSHARE} -o client.so ${CLIENT_DIR}/client.c -ldl
+
+server.o: ${SERVER_DIR}/serveur.c  ${SERVER_DIR}/carcassonne_interface.h
+	${CC} ${CFLAGS} -I${SERVER_DIR} ${SERVER_DIR}/serveur.c -c
+
+server: server.o
+	${CC} server.o -o $@
+
+aff:
+	@echo 
+	@echo "dossier client :" && ls ${CLIENT_DIR}
+	@echo 
+	@echo "dossier serveur :" && ls ${SERVER_DIR}
+	@echo
+	@echo "dossier install :" && ls ${INSTALL_DIR}

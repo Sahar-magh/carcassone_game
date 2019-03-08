@@ -1,0 +1,47 @@
+#ifndef UPDATE_FIELD_H
+#define UPDATE_FIELD_H
+
+#include <stdlib.h>
+#include <stdio.h>
+
+#include "carte.h"
+#include "link.h"
+#include "updateTown.h"
+
+int ExtractField(struct tuille * tutuille, struct field * fieldTutuille[]);
+struct position ReverseZ(struct triplet * tr);
+int MeepleInField(struct tuille * tutuille, struct field * f);
+void copie_triple(struct triplet *t1,struct triplet *t2);
+void MonasteryField(struct tuille * tutuille,struct field *fieldTutuille[], struct field *fieldInTown[],int res[]);
+int NumberField(struct tuille * tutuille);
+void InternFusionFieldNoTown(struct tuille * tutuille,struct field * fieldTutuille[],struct field * fieldInTown[],int res[]);
+void InternFusionFieldTownNoRoad(struct tuille * tutuille, struct field * fieldTutuille[], struct field * fieldInTown[], int res[]);
+void InternFusionFieldTownOneRoad2(struct tuille *tutuille, struct field *fieldTutuille[], struct field *fieldInTown[], int res[]);
+void InternFusionFieldTownOneRoad(struct tuille *tutuille, struct field *fieldTutuille[], struct field *fieldInTown[], int res[]);
+void InternFusionFieldTownThreeRoad(struct tuille * tutuille, struct field * fieldTutuille[],struct field *fieldInTown[],int res[]); 
+int IsTown(struct tuille * tutuille);
+void InternFusionFieldTown(struct tuille * tutuille, struct field * fieldTutuille[],struct field *fieldInTown[],int res[]);
+void InternFusionField(struct tuille * tutuille, struct field *fieldTutuille[],struct field *fieldInTown[],int res[]);
+int NotIn(struct field *f,struct triplet tri);
+void MergeField(struct field *f,struct field * find);
+void FusionField(struct field * f, struct field * find[],struct triplet next[], int len);
+int same_triplet(struct triplet * t1,struct triplet * t2);
+int IsEqualField(struct field * f1,struct field * f2);
+struct field * FindFieldInTown(struct city * c,struct field * f);
+struct field * findTownField(struct boardgame * boboard,struct field * f);
+struct triplet triplet_vide();
+struct position DirectionField(struct boardgame * boboard, struct triplet * t);
+
+struct triplet NextTripletField(struct triplet * t,struct position p,int dir_next, int dir_origine);
+
+int FindTripletInField(struct field * ch, struct triplet * t);
+struct field *FindTripletFieldInTown(struct city *c, struct triplet* t);
+struct field * FindField(struct boardgame * boboard, struct triplet next);
+void ExternFusionFieldInTown(struct boardgame * boboard,struct field * f);
+struct city * IsTownField(struct boardgame * boboard, struct field * f);
+void MergeFieldNoTown(struct boardgame * boboard,struct field * f,struct field * find);
+void FusionFieldNoTown(struct boardgame * boboard, struct field * f, struct field * find[],struct triplet next[], int len);
+
+void ExternFusionFieldNoTown(struct boardgame * boboard,struct field * f);
+void UpdateField(struct boardgame * boboard, struct tuille tutuille);
+#endif

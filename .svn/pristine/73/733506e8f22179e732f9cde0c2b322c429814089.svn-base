@@ -1,0 +1,86 @@
+#include <stdlib.h>
+#include <stdio.h>
+#include "link.h"
+#include "carte.h"
+
+struct link * lnk_empty() 
+{
+  struct link * valu;
+  valu = malloc(sizeof(struct link));
+  valu->taille = 0;
+  valu->head = NULL;
+  return valu;
+}
+
+struct lelement * llm_empty()
+{
+  struct lelement * valu;
+  valu = malloc(sizeof(struct lelement));
+  valu->tutuille = NULL;
+  valu->next = NULL;
+  valu->previous = NULL;
+  return valu;
+}
+
+void lnk_add(struct link * lnk, struct lelement * new)
+{
+  struct lelement * current = lnk->head;
+  for (int i=1 ; i < lnk->taille ; i++) {
+    current = current->next;
+  }
+  current->next = new;
+  new->previous = current;
+  lnk->taille ++;
+}
+
+int is_equal(struct tuille * tutuille1, struct tuille * tutuille2) {
+  for(int i =0;i<4;i++){
+    for(int j = 0;j<3;j++){
+      if(tutuille1->type[i][j] != tutuille2->type[i][j])
+	return FALSE;
+      if(tutuille2->pion[i][j] != tutuille1->pion[i][j])
+	return FALSE;
+    }
+  }
+  if( tutuille2->dir != tutuille1->dir)
+    return FALSE;
+  if( tutuille1->milieu != tutuille2->milieu)
+    return FALSE;
+  if( tutuille2->shield != tutuille1->shield)
+    return FALSE;
+  if( tutuille1->position[0] != tutuille2->position[0])
+    return FALSE;
+  if( tutuille2->position[1] != tutuille1->position[1])
+    return FALSE;
+  return TRUE;
+}
+ 
+
+int llm_find(struct link * lnk, struct lelement * llm)
+{
+  struct lelement * current = lnk->head;
+  for (int i = 1; i < lnk->taille ; i++) {
+    if (is_equal((struct tuille)&current,(struct tuille)llm->tutuille)) {
+      return TRUE;
+    }
+    current = current->next;
+  }
+  return FALSE;
+}
+
+void lnk_free(struct link * lnk)
+{
+  struct lelement * current = lnk->head->next;
+  for (int i = 2; i < lnk->taille ; i++) {
+    free(current->previous);
+    current = current->next;
+  }
+  lnk->taille = 0;
+  free(current);
+  free(lnk);
+}
+
+void llm_free(struct lelement * llm)
+{
+  free(llm);
+}
